@@ -16,6 +16,7 @@
     "@brisq/common": "1.0.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -23,6 +24,8 @@
     "prisma": "^7.8.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.2",

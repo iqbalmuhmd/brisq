@@ -1,13 +1,14 @@
 import express from "express";
 import { errorHandler } from "@brisq/common";
+import { buildAuthRouter } from "./routes/auth/auth.routes";
+import { registerController } from "./config/container";
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", service: "auth-service" });
-});
+const authRouter = buildAuthRouter({ registerController });
+app.use("/auth", authRouter);
 
 app.use(errorHandler);
 
