@@ -1,11 +1,10 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 import { ConflictError, UserEntity } from "@brisq/common";
-import { buildUserRepository } from '../../repositories/auth/user.repository';
+import { buildUserRepository } from "../../repositories/auth/user.repository";
 
 type UserRepository = ReturnType<typeof buildUserRepository>;
 
 export function buildRegisterService(userRepository: UserRepository) {
-
   return async (email: string, password: string) => {
     const existingUser = await userRepository.findByEmail(email);
 
@@ -24,5 +23,4 @@ export function buildRegisterService(userRepository: UserRepository) {
 
     return { id: user.id, email: user.email };
   };
-
 }
