@@ -7,18 +7,16 @@ type UserRepository = ReturnType<typeof buildUserRepository>;
 export function buildRegisterService(userRepository: UserRepository) {
   return async (email: string, password: string) => {
     const existingUser = await userRepository.findByEmail(email);
-
     if (existingUser) throw new ConflictError("Email already exist");
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const userEntity = new UserEntity(email, hashedPassword);
+    const userEntity = new UserEntity(email, password);
     userEntity.validate();
+
+    const hashedPassword = await bcrypt.hash(userEntity.get().password, 10);
 
     const user = await userRepository.createUser(
       userEntity.get().email,
-      userEntity.get().passwordHash,
+      hashedPassword,
     );
 
     return { id: user.id, email: user.email };
