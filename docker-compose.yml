@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:15
+    container_name: brisq-postgres
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
@@ -10,24 +11,38 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U user -d brisq_auth"]
       interval: 5s
       retries: 5
 
   auth:
     build:
-       context: .
-       dockerfile: auth/Dockerfile
+      context: .
+      dockerfile: auth/Dockerfile
+    container_name: brisq-auth
     ports:
       - "3001:3001"
+    env_file:
+      - path: ./auth/.env.development
+        required: true
     environment:
-      - PORT=3001
-      - NODE_ENV=development
       - DATABASE_URL=postgresql://user:pass@postgres:5432/brisq_auth
-
+      - NODE_ENV=development
     depends_on:
       postgres:
         condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./auth/src
+          target: /app/auth/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./auth/package.json
+        - action: rebuild
+          path: ./common/src
 
 volumes:
   postgres_data:
+    name: brisq_postgres_data
