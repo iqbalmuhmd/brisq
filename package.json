@@ -2,5 +2,5 @@
   "name": "brisq",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["common", "auth"]
+  "workspaces": ["common", "auth", "api-gateway"]
 }

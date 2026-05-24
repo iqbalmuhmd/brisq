@@ -20,8 +20,6 @@ services:
       context: .
       dockerfile: auth/Dockerfile
     container_name: brisq-auth
-    ports:
-      - "3001:3001"
     env_file:
       - path: ./auth/.env.development
         required: true
@@ -42,6 +40,29 @@ services:
           path: ./auth/package.json
         - action: rebuild
           path: ./common/src
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: brisq-api-gateway
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: ./api-gateway/.env.development
+        required: true
+    environment:
+      - NODE_ENV=development
+    develop:
+      watch:
+        - action: sync
+          path: ./api-gateway/src
+          target: /app/api-gateway/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./api-gateway/package.json
+        - action: rebuild
+          path: ./common/src        
 
 volumes:
   postgres_data:
