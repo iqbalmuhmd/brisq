@@ -1,0 +1,1 @@
+export { mockUserRepository } from '../__mocks__/user.repository.mock';

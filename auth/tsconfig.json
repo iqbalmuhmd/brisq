@@ -5,7 +5,8 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*.ts", "generated/**/*.ts"],
   "exclude": ["node_modules", "dist"]
