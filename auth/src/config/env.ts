@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.development" });
 import { loadEnv } from "@brisq/common";
 
-loadEnv(["DATABASE_URL", "PORT", "JWT_SECRET"]);
+loadEnv(["DATABASE_URL", "PORT", "JWT_SECRET", "INTER_SERVICE_SECRET"]);
 
 export const config = {
   port: Number(process.env.PORT) || 3001,

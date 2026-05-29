@@ -11,7 +11,10 @@ export async function forwardToAuth(
 
     const response = await fetch(url, {
       method: req.method,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-secret": config.x_internal_secret!,
+      },
       body: JSON.stringify(req.body),
     });
 

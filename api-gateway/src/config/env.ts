@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.development" });
 import { loadEnv } from "@brisq/common";
 
-loadEnv(["PORT", "AUTH_SERVICE_URL", "JWT_SECRET"]);
+loadEnv(["PORT", "AUTH_SERVICE_URL", "JWT_SECRET", "INTER_SERVICE_SECRET"]);
 
 export const config = {
   port: Number(process.env.PORT) || 3000,
@@ -12,4 +12,6 @@ export const config = {
   jwt: {
     secret: process.env.JWT_SECRET!,
   },
+  x_internal_secret: process.env.INTER_SERVICE_SECRET,
+  
 } as const;
