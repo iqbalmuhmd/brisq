@@ -3,3 +3,8 @@ export const mockUserRepository = {
   findById: jest.fn(),
   createUser: jest.fn(),
 };
+
+export const mockTokenService = {
+  sign: jest.fn(),
+  verify: jest.fn(),
+};
