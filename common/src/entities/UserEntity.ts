@@ -7,6 +7,9 @@ export class UserEntity {
   ) {}
 
   validate(): void {
+    if (!this.email || !this.password)
+      throw new BadRequestError("Email and password are required");
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.email)) {
       throw new BadRequestError("Invalid email format");
