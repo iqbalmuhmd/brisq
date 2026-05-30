@@ -50,3 +50,36 @@ describe("POST /auth/register", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("POST /auth/login", () => {
+  beforeEach(async () => {
+    await request(app)
+      .post("/auth/register")
+      .send({ email: "test@example.com", password: "password123" });
+  });
+
+  it("returns 200 and sets cookie on valid credentials", async () => {
+    const res = await request(app)
+      .post("/auth/login")
+      .send({ email: "test@example.com", password: "password123" });
+
+    expect(res.status).toBe(200);
+    expect(res.headers["set-cookie"]).toBeDefined();
+  });
+
+  it("returns 401 on wrong password", async () => {
+    const res = await request(app)
+      .post("/auth/login")
+      .send({ email: "test@example.com", password: "wrongpassword" });
+
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 401 on unknown email", async () => {
+    const res = await request(app)
+      .post("/auth/login")
+      .send({ email: "unknown@example.com", password: "password123" });
+
+    expect(res.status).toBe(401);
+  });
+});
