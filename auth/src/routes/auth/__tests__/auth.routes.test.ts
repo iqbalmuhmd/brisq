@@ -83,3 +83,29 @@ describe("POST /auth/login", () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe("GET /auth/verify", () => {
+  it("returns 401 with no cookie", async () => {
+    const res = await request(app).get("/auth/verify");
+
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 200 with userId and email after login", async () => {
+    await request(app)
+      .post("/auth/register")
+      .send({ email: "test@example.com", password: "password123" });
+
+    const loginRes = await request(app)
+      .post("/auth/login")
+      .send({ email: "test@example.com", password: "password123" });
+
+    const cookie = loginRes.headers["set-cookie"];
+
+    const res = await request(app).get("/auth/verify").set("Cookie", cookie);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveProperty("userId");
+    expect(res.body.data).toHaveProperty("email");
+  });
+});
