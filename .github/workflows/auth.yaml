@@ -1,0 +1,41 @@
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "auth/**"
+      - "common/**"
+
+jobs:
+  test:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/brisq_test
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brisq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @brisq/common
+      - run: npx prisma generate
+        working-directory: auth
+      - run: npx prisma migrate deploy
+        working-directory: auth
