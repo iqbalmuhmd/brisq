@@ -17,7 +17,7 @@ describe("POST /auth/register", () => {
       .send({ email: "test@example.com", password: "password123" });
 
     expect(res.status).toBe(201);
-    expect(res.body.data).toHaveProperty("id");
+    expect(res.body.data).toHaveProperty("userId");
     expect(res.body.data).toHaveProperty("email", "test@example.com");
     expect(res.body.data).not.toHaveProperty("passwordHash");
   });
