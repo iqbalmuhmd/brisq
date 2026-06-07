@@ -19,6 +19,6 @@ export function buildRegisterService(userRepository: UserRepository) {
       hashedPassword,
     );
 
-    return { id: user.id, email: user.email };
+    return { userId: user.id, email: user.email };
   };
 }

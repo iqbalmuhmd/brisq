@@ -7,3 +7,4 @@ export * from "./utils";
 export * from "./entities";
 export * from "./logging";
 export type { AuthenticatedUser } from "./types/express";
+export type { Logger } from 'winston';

@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import { buildLoginService } from "../../services/auth/login.service";
 import { ApiResponse } from "@brisq/common";
+import { Logger } from "@brisq/common";
 
 type LoginService = ReturnType<typeof buildLoginService>;
 
-export function buildLoginController(loginService: LoginService) {
+export function buildLoginController(
+  loginService: LoginService,
+  logger: Logger,
+) {
   return async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await loginService(email, password);
@@ -15,6 +19,8 @@ export function buildLoginController(loginService: LoginService) {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    logger.info("User logged in", { userId: user.userId, email: user.email });
 
     res.status(200).json(
       new ApiResponse(true, "Login successful", {
