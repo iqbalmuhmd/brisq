@@ -3,4 +3,5 @@ dist/
 generated/
 .env
 .env.*
+!**/.env.test
 .DS_Store

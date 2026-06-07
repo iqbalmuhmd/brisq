@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.development" });
+const envFile =
+  process.env.NODE_ENV === "test" ? ".env.test" : ".env.development";
+dotenv.config({ path: envFile });
 import { loadEnv } from "@brisq/common";
-
 loadEnv(["DATABASE_URL", "PORT", "JWT_SECRET", "INTER_SERVICE_SECRET"]);
 
 export const config = {
