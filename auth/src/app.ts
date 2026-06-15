@@ -4,6 +4,7 @@ import { errorHandler } from "@brisq/common";
 import { buildAuthRouter } from "./routes/auth/auth.routes";
 import { registerController } from "./config/container";
 import { loginController } from "./config/container";
+import { linkedInController } from "./config/container";
 import { buildMorganMiddleware } from "@brisq/common";
 import { logger } from "./config/container";
 
@@ -13,7 +14,11 @@ app.use(buildMorganMiddleware(logger));
 app.use(express.json());
 app.use(cookieParser());
 
-const authRouter = buildAuthRouter({ registerController, loginController });
+const authRouter = buildAuthRouter({
+  registerController,
+  loginController,
+  linkedInController,
+});
 app.use("/auth", authRouter);
 
 app.use(errorHandler);
