@@ -18,6 +18,8 @@ services:
       context: .
       dockerfile: auth/Dockerfile
     container_name: brisq-auth
+    ports:
+      - "3001:3001"
     env_file:
       - path: ./auth/.env.development
         required: true
