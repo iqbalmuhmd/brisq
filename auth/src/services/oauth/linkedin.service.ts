@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { buildTokenRepository } from "../../repositories/token/token.repository";
-import { InternalServerError, Platform } from "@brisq/common";
+import { InternalServerError, NotFoundError, Platform } from "@brisq/common";
 
 type LinkedInConfig = {
   clientId: string;
@@ -64,6 +64,16 @@ export function buildLinkedInService(
         refresh_token,
         expiresAt,
       );
+    },
+    async getValidToken(userId: string, platform: Platform) {
+      const token = await tokenRepository.getToken(userId, platform);
+
+      if (!token) throw new NotFoundError("No token provided");
+
+      if (new Date() > token.expiresAt)
+        throw new InternalServerError("Token expired");
+
+      return token.accessToken;
     },
   };
 }

@@ -8,9 +8,10 @@ import { buildLoginController } from "../controllers/auth/login.controller";
 import { buildLinkedInService } from "../services/oauth/linkedin.service";
 import { buildLinkedInController } from "../controllers/oauth/linkedin.controller";
 import { buildTokenRepository } from "../repositories/token/token.repository";
+import { buildLinkedInCallbackController } from "../controllers/oauth/linkedin.callback.controller";
+import { buildTokenController } from "../controllers/oauth/token.controller";
 import { config } from "./env";
 import { buildLogger } from "@brisq/common";
-import { buildLinkedInCallbackController } from "../controllers/oauth/linkedin.callback.controller";
 
 const userRepository = buildUserRepository(prisma);
 const tokenService = buildTokenService(config.jwt.secret);
@@ -33,5 +34,7 @@ export const linkedInController = buildLinkedInController(
 );
 export const linkedInCallbackController =
   buildLinkedInCallbackController(linkedInService);
+
+export const tokenController = buildTokenController(linkedInService, logger);
 
 export { logger };

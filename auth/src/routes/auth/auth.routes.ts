@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { RequestHandler } from "express";
-import { authMiddleware } from "@brisq/common";
+import { authMiddleware, interServiceMiddleware } from "@brisq/common";
 import { verifyController } from "../../controllers/auth/verify.controller";
 
 export function buildAuthRouter(deps: {
@@ -8,6 +8,7 @@ export function buildAuthRouter(deps: {
   loginController: RequestHandler;
   linkedInController: RequestHandler;
   linkedInCallbackController: RequestHandler;
+  tokenController: RequestHandler;
 }) {
   const router = Router();
 
@@ -20,6 +21,7 @@ export function buildAuthRouter(deps: {
     authMiddleware,
     deps.linkedInCallbackController,
   );
+  router.get("/token/:platform", interServiceMiddleware, deps.tokenController);
 
   return router;
 }
