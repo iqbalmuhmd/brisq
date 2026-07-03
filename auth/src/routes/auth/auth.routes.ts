@@ -1,5 +1,4 @@
-import { Router } from "express";
-import { RequestHandler } from "express";
+import { Router, RequestHandler } from "express";
 import { authMiddleware, interServiceMiddleware } from "@brisq/common";
 import { verifyController } from "../../controllers/auth/verify.controller";
 
