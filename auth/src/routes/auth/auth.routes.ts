@@ -9,6 +9,7 @@ export function buildAuthRouter(deps: {
   linkedInController: RequestHandler;
   linkedInCallbackController: RequestHandler;
   tokenController: RequestHandler;
+  linkedinStatusController: RequestHandler;
 }) {
   const router = Router();
 
@@ -22,6 +23,11 @@ export function buildAuthRouter(deps: {
     deps.linkedInCallbackController,
   );
   router.get("/token/:platform", interServiceMiddleware, deps.tokenController);
+  router.get(
+    "/linkedin/status/:platform",
+    authMiddleware,
+    deps.linkedinStatusController,
+  );
 
   return router;
 }

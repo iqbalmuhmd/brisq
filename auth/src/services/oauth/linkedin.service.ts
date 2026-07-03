@@ -75,5 +75,12 @@ export function buildLinkedInService(
 
       return token.accessToken;
     },
+    async getTokenStatus(userId: string, platform: Platform) {
+      const token = await tokenRepository.getToken(userId, platform);
+
+      if (!token) return { connected: false };
+
+      return { connected: true, expiresAt: token.expiresAt };
+    },
   };
 }
