@@ -8,15 +8,7 @@ export function buildLinkedInCallbackController(
   linkedInService: LinkedInService,
 ) {
   return async (req: Request, res: Response) => {
-    const { code, state, error } = req.query as Record<string, string>;
-
-    if (error === "access_denied") {
-      return res.status(200).json(
-        new ApiResponse(true, "LinkedIn connection cancelled", {
-          status: "cancelled",
-        }),
-      );
-    }
+    const { code, state } = req.query as Record<string, string>;
 
     const storedState = req.cookies.state;
 
