@@ -10,6 +10,10 @@ export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get("state");
   const error = req.nextUrl.searchParams.get("error");
 
+  if (error === "access_denied") {
+    return dashboard("?error=connection_cancelled");
+  }
+
   if (error || !code || !state) {
     return dashboard("?error=oauth_failed");
   }

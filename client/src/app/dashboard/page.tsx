@@ -1,7 +1,13 @@
 import { cookies } from "next/headers";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://localhost:3000";
+
+  const { error } = await searchParams;
 
   async function getLinkedInStatus() {
     const cookieStore = await cookies();
@@ -19,9 +25,23 @@ export default async function DashboardPage() {
 
   const status = await getLinkedInStatus();
 
+  const errorMessages: Record<string, string> = {
+    connection_cancelled: "You cancelled the LinkedIn connection.",
+    oauth_failed: "Connecting to LinkedIn failed. Please try again.",
+  };
+
+  const errorMessage = error ? errorMessages[error] : undefined;
+
   return (
     <main className="mx-auto max-w-2xl p-8">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
+
+      {errorMessage && (
+        <div className="mt-4 rounded border border-red-300 bg-red-50 p-3 text-red-800">
+          {errorMessage}
+        </div>
+      )}
+
       {status.connected ? (
         <p className="mt-4">LinkedIn: Connected ✓</p>
       ) : (
