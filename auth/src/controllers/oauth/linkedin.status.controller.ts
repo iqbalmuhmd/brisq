@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { buildLinkedInService } from "../../services/oauth/linkedin.service";
-import { ApiResponse, Logger, Platform } from "@brisq/common";
+import { ApiResponse, Logger, parsePlatform } from "@brisq/common";
 
 type LinkedInService = ReturnType<typeof buildLinkedInService>;
 
@@ -11,7 +11,7 @@ export function buildLinkedInStatusController(
   return async (req: Request, res: Response) => {
     const status = await linkedInService.getTokenStatus(
       req.user!.userId,
-      req.params.platform as Platform,
+      parsePlatform(req.params.platform),
     );
 
     logger.info("Token status retrieved", { userId: req.user!.userId });
