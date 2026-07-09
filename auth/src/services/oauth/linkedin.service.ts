@@ -70,7 +70,7 @@ export function buildLinkedInService(
 
       if (!token) throw new NotFoundError("No token provided");
 
-      if (new Date() > token.expiresAt)
+      if (new Date() >= token.expiresAt)
         throw new InternalServerError("Token expired");
 
       return token.accessToken;
