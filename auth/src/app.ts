@@ -1,14 +1,14 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "@brisq/common";
-import { buildAuthRouter } from "./routes/auth/auth.routes";
+import { buildAuthRouter } from "./routes/auth.routes";
 import {
   registerController,
   loginController,
   linkedInController,
   linkedInCallbackController,
   tokenController,
-  linkedinStatusController
+  linkedinStatusController,
 } from "./config/container";
 import { buildMorganMiddleware } from "@brisq/common";
 import { logger } from "./config/container";

@@ -1,6 +1,6 @@
 import { Router, RequestHandler } from "express";
 import { authMiddleware, interServiceMiddleware } from "@brisq/common";
-import { verifyController } from "../../controllers/auth/verify.controller";
+import { verifyController } from "../controllers/auth/verify.controller";
 
 export function buildAuthRouter(deps: {
   registerController: RequestHandler;
