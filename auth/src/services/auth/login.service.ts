@@ -1,4 +1,4 @@
-import { UnauthorizedError } from "@brisq/common";
+import { BadRequestError, UnauthorizedError } from "@brisq/common";
 import { buildUserRepository } from "../../repositories/auth/user.repository";
 import { buildTokenService } from "./token.service";
 import bcrypt from "bcryptjs";
@@ -11,7 +11,10 @@ export function buildLoginService(
   tokenService: TokenService,
 ) {
   return async (email: string, password: string) => {
-    const user = await userRepository.findByEmail(email);
+    if (!email || !password)
+      throw new BadRequestError("email and password required");
+
+    const user = await userRepository.findByEmail(email.trim().toLowerCase());
 
     if (!user) throw new UnauthorizedError("Invalid credentials");
 
@@ -19,7 +22,7 @@ export function buildLoginService(
     if (!isMatch) throw new UnauthorizedError("Invalid credentials");
 
     const token = tokenService.sign(user.id, user.email);
-    
+
     return { token, userId: user.id, email: user.email };
   };
 }
