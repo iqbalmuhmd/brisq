@@ -18,7 +18,7 @@ describe("registerService", () => {
 
     const result = await registerService("test@example.com", "password123");
 
-    expect(result).toEqual({ id: "user-123", email: "test@example.com" });
+    expect(result).toEqual({ userId: "user-123", email: "test@example.com" });
     expect(mockUserRepository.createUser).toHaveBeenCalledTimes(1);
   });
 

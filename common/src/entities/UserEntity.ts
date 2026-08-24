@@ -1,28 +1,30 @@
+import { z } from "zod";
 import { BadRequestError } from "../errors";
 
+const userSchema = z.object({
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().min(8),
+});
+
 export class UserEntity {
-  constructor(
-    private email: string,
-    private password: string,
-  ) {}
+  private readonly _email: string;
 
-  validate(): void {
-    if (!this.email || !this.password)
-      throw new BadRequestError("Email and password are required");
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.email)) {
-      throw new BadRequestError("Invalid email format");
+  constructor(email: string, password: string) {
+    const result = userSchema.safeParse({ email, password });
+    if (!result.success) {
+      throw new BadRequestError(result.error.issues[0].message);
     }
-    if (this.password.length < 8) {
-      throw new BadRequestError("Password must be at least 8 characters");
-    }
+    this._email = result.data.email;
   }
 
-  get() {
+  get email() {
+    return this._email;
+  }
+
+  toPersisted(hashedPassword: string) {
     return Object.freeze({
-      email: this.email,
-      password: this.password,
+      email: this._email,
+      password: hashedPassword,
     });
   }
 }

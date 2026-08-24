@@ -1,0 +1,1 @@
+export { mockTokenRepository } from "../__mocks__/token.repository.mock";

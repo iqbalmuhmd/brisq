@@ -14,6 +14,7 @@ export async function forwardToAuth(
       headers: {
         "Content-Type": "application/json",
         "x-internal-secret": config.x_internal_secret!,
+        "Cookie": req.headers.cookie || ""
       },
       body: JSON.stringify(req.body),
     });
