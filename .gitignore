@@ -4,3 +4,4 @@ docs/
 .env
 .env.*
 .DS_Store
+*.todo
