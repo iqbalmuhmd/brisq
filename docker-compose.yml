@@ -3,28 +3,41 @@ services:
     image: postgres:15
     container_name: brisq-postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: brisq_auth
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d brisq_auth"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: brisq-rabbitmq
+    ports:
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
   auth:
     build:
       context: .
       dockerfile: auth/Dockerfile
     container_name: brisq-auth
-    ports:
-      - "3001:3001"
     env_file:
       - path: ./auth/.env.development
         required: true
     environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/brisq_auth
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       - NODE_ENV=development
     depends_on:
       postgres:
@@ -40,6 +53,7 @@ services:
           path: ./auth/package.json
         - action: rebuild
           path: ./common/src
+
   api-gateway:
     build:
       context: .
@@ -62,8 +76,10 @@ services:
         - action: rebuild
           path: ./api-gateway/package.json
         - action: rebuild
-          path: ./common/src        
+          path: ./common/src
 
 volumes:
   postgres_data:
     name: brisq_postgres_data
+  rabbitmq_data:
+    name: brisq_rabbitmq_data
