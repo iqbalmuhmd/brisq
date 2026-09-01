@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PostStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum Platform {
+  LINKEDIN
+}
+
+model Post {
+  id               String               @id @default(cuid())
+  userId           String
+  content          String
+  imageUrl         String?
+  createdAt        DateTime             @default(now())
+  platformStatuses PostPlatformStatus[]
+}
+
+model PostPlatformStatus {
+  id           String     @id @default(cuid())
+  postId       String
+  platform     Platform
+  status       PostStatus @default(PENDING)
+  errorMessage String?
+  updatedAt    DateTime   @updatedAt
+  post         Post       @relation(fields: [postId], references: [id])
+}
