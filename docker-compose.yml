@@ -1,15 +1,15 @@
 services:
-  postgres:
+  postgres-auth:
     image: postgres:15
-    container_name: brisq-postgres
+    container_name: brisq-postgres-auth
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${AUTH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AUTH_POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_POSTGRES_USER} -d ${AUTH_POSTGRES_DB}"]
       interval: 5s
       retries: 5
 
@@ -37,10 +37,10 @@ services:
       - path: ./auth/.env.development
         required: true
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${AUTH_POSTGRES_USER}:${AUTH_POSTGRES_PASSWORD}@postgres-auth:5432/${AUTH_POSTGRES_DB}
       - NODE_ENV=development
     depends_on:
-      postgres:
+      postgres-auth:
         condition: service_healthy
     develop:
       watch:
