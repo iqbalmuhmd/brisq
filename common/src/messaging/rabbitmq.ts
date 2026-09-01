@@ -20,6 +20,23 @@ export async function connectRabbitMQ(): Promise<void> {
       );
       connection.on("close", () => console.error("RabbitMQ connection closed"));
 
+      await channel.assertExchange("job_results", "fanout", { durable: true });
+
+      await channel.assertExchange("publish_jobs_dlx", "direct", {
+        durable: true,
+      });
+      await channel.assertQueue("publish_jobs_dead", { durable: true });
+      await channel.bindQueue(
+        "publish_jobs_dead",
+        "publish_jobs_dlx",
+        "publish_jobs",
+      );
+
+      await channel.assertQueue("publish_jobs", {
+        durable: true,
+        arguments: { "x-dead-letter-exchange": "publish_jobs_dlx" },
+      });
+
       console.log("RabbitMQ connected");
       return;
     } catch (err) {

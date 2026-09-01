@@ -9,3 +9,4 @@ export * from "./logging";
 export * from "./types";
 export type { AuthenticatedUser } from "./types/express";
 export type { Logger } from "winston";
+export * from "./messaging/rabbitmq";
