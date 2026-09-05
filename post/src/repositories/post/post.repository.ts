@@ -1,5 +1,8 @@
-import { PrismaClient } from "../../../generated/prisma/client";
-import { Platform } from "../../../generated/prisma/client";
+import {
+  PrismaClient,
+  Platform,
+  PostStatus,
+} from "../../../generated/prisma/client";
 
 export function buildPostRepository(prisma: PrismaClient) {
   return {
@@ -17,6 +20,18 @@ export function buildPostRepository(prisma: PrismaClient) {
           platformStatuses: { create: platformStatuses },
         },
         include: { platformStatuses: true },
+      });
+    },
+
+    updatePlatformStatus: async (
+      postId: string,
+      platform: Platform,
+      status: PostStatus,
+      errorMessage: string | null,
+    ) => {
+      return prisma.postPlatformStatus.update({
+        where: { postId_platform: { postId, platform } },
+        data: { status, errorMessage },
       });
     },
   };

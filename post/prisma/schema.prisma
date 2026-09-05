@@ -34,4 +34,6 @@ model PostPlatformStatus {
   errorMessage String?
   updatedAt    DateTime   @updatedAt
   post         Post       @relation(fields: [postId], references: [id])
+
+  @@unique([postId, platform])
 }
