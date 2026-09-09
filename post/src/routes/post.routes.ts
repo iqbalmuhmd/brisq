@@ -4,6 +4,7 @@ import { authMiddleware, interServiceMiddleware } from "@brisq/common";
 export function buildPostRouter(deps: {
   publishController: RequestHandler;
   updatePlatformStatusController: RequestHandler;
+  getPostsController: RequestHandler;
 }) {
   const router = Router();
   router.post("/publish", authMiddleware, deps.publishController);
@@ -12,5 +13,6 @@ export function buildPostRouter(deps: {
     interServiceMiddleware,
     deps.updatePlatformStatusController,
   );
+  router.get("/", authMiddleware, deps.getPostsController);
   return router;
 }

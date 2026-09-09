@@ -34,5 +34,13 @@ export function buildPostRepository(prisma: PrismaClient) {
         data: { status, errorMessage },
       });
     },
+
+    findManyByUser: async (userId: string) => {
+      return prisma.post.findMany({
+        where: { userId },
+        include: { platformStatuses: true },
+        orderBy: { createdAt: "desc" },
+      });
+    },
   };
 }

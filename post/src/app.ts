@@ -5,6 +5,7 @@ import { buildPostRouter } from "./routes/post.routes";
 import {
   publishController,
   updatePlatformStatusController,
+  getPostsController,
 } from "./config/container";
 
 const app = express();
@@ -14,7 +15,11 @@ app.use(cookieParser());
 
 app.use(
   "/posts",
-  buildPostRouter({ publishController, updatePlatformStatusController }),
+  buildPostRouter({
+    publishController,
+    updatePlatformStatusController,
+    getPostsController,
+  }),
 );
 
 app.use(errorHandler);
