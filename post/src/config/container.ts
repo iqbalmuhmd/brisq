@@ -7,6 +7,8 @@ import { buildUpdatePlatformStatusService } from "../services/updatePlatformStat
 import { buildUpdatePlatformStatusController } from "../controllers/updatePlatformStatus.controller";
 import { buildGetPostsService } from "../services/getPosts.service";
 import { buildGetPostsController } from "../controllers/getPosts.controller";
+import { buildGetPostService } from "../services/getPost.service";
+import { buildGetPostController } from "../controllers/getPost.controller";
 
 const postRepository = buildPostRepository(prisma);
 
@@ -14,8 +16,10 @@ const publishService = buildPublishService(postRepository, jobPublisher);
 const updatePlatformStatusService =
   buildUpdatePlatformStatusService(postRepository);
 const getPostsService = buildGetPostsService(postRepository);
+const getPostService = buildGetPostService(postRepository);
 
 export const publishController = buildPublishController(publishService);
 export const updatePlatformStatusController =
   buildUpdatePlatformStatusController(updatePlatformStatusService);
 export const getPostsController = buildGetPostsController(getPostsService);
+export const getPostController = buildGetPostController(getPostService);

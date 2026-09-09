@@ -42,5 +42,12 @@ export function buildPostRepository(prisma: PrismaClient) {
         orderBy: { createdAt: "desc" },
       });
     },
+
+    findByIdForUser: async (postId: string, userId: string) => {
+      return prisma.post.findFirst({
+        where: { id: postId, userId },
+        include: { platformStatuses: true },
+      });
+    },
   };
 }

@@ -5,6 +5,7 @@ export function buildPostRouter(deps: {
   publishController: RequestHandler;
   updatePlatformStatusController: RequestHandler;
   getPostsController: RequestHandler;
+  getPostController: RequestHandler;
 }) {
   const router = Router();
   router.post("/publish", authMiddleware, deps.publishController);
@@ -14,5 +15,7 @@ export function buildPostRouter(deps: {
     deps.updatePlatformStatusController,
   );
   router.get("/", authMiddleware, deps.getPostsController);
+  router.get("/:postId", authMiddleware, deps.getPostController);
+
   return router;
 }
