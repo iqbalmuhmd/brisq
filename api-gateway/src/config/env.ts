@@ -9,9 +9,12 @@ export const config = {
   auth_service: {
     url: process.env.AUTH_SERVICE_URL,
   },
+  post_service: {
+    url: process.env.POST_SERVICE_URL,
+  },
+
   jwt: {
     secret: process.env.JWT_SECRET!,
   },
   x_internal_secret: process.env.INTER_SERVICE_SECRET,
-  
 } as const;
