@@ -1,5 +1,9 @@
 import { Router, RequestHandler } from "express";
-import { authMiddleware, interServiceMiddleware } from "@brisq/common";
+import {
+  authMiddleware,
+  interServiceMiddleware,
+  userContextMiddleware,
+} from "@brisq/common";
 import { verifyController } from "../controllers/auth/verify.controller";
 
 export function buildAuthRouter(deps: {
@@ -15,16 +19,23 @@ export function buildAuthRouter(deps: {
   router.post("/register", deps.registerController);
   router.post("/login", deps.loginController);
   router.get("/verify", authMiddleware, verifyController);
-  router.get("/linkedin", authMiddleware, deps.linkedInController);
+  router.get(
+    "/linkedin",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.linkedInController,
+  );
   router.get(
     "/linkedin/callback",
-    authMiddleware,
+    interServiceMiddleware,
+    userContextMiddleware,
     deps.linkedInCallbackController,
   );
   router.get("/token/:platform", interServiceMiddleware, deps.tokenController);
   router.get(
     "/linkedin/status/:platform",
-    authMiddleware,
+    interServiceMiddleware,
+    userContextMiddleware,
     deps.linkedinStatusController,
   );
 
