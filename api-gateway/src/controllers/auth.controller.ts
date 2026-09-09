@@ -8,15 +8,16 @@ export async function forwardToAuth(
 ) {
   try {
     const url = `${config.auth_service.url}${req.originalUrl}`;
+    const hasBody = req.method !== "GET" && req.method !== "HEAD";
 
     const response = await fetch(url, {
       method: req.method,
       headers: {
         "Content-Type": "application/json",
         "x-internal-secret": config.x_internal_secret!,
-        "Cookie": req.headers.cookie || ""
+        Cookie: req.headers.cookie || "",
       },
-      body: JSON.stringify(req.body),
+      ...(hasBody ? { body: JSON.stringify(req.body) } : {}),
     });
 
     const data = await response.json();
