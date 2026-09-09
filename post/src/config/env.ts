@@ -7,7 +7,7 @@ dotenv.config({ path: envFile });
 
 import { loadEnv } from "@brisq/common";
 
-loadEnv(["DATABASE_URL", "PORT", "INTER_SERVICE_SECRET", "RABBITMQ_URL", "JWT_SECRET"]);
+loadEnv(["DATABASE_URL", "PORT", "INTER_SERVICE_SECRET", "RABBITMQ_URL"]);
 
 export const config = {
   port: Number(process.env.PORT) || 3002,

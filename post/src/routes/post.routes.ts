@@ -1,5 +1,5 @@
 import { Router, RequestHandler } from "express";
-import { authMiddleware, interServiceMiddleware } from "@brisq/common";
+import { userContextMiddleware, interServiceMiddleware } from "@brisq/common";
 
 export function buildPostRouter(deps: {
   publishController: RequestHandler;
@@ -8,14 +8,30 @@ export function buildPostRouter(deps: {
   getPostController: RequestHandler;
 }) {
   const router = Router();
-  router.post("/publish", authMiddleware, deps.publishController);
+  router.post(
+    "/publish",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.publishController,
+  );
   router.patch(
     "/:postId/platform-status",
     interServiceMiddleware,
+    userContextMiddleware,
     deps.updatePlatformStatusController,
   );
-  router.get("/", authMiddleware, deps.getPostsController);
-  router.get("/:postId", authMiddleware, deps.getPostController);
+  router.get(
+    "/",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.getPostsController,
+  );
+  router.get(
+    "/:postId",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.getPostController,
+  );
 
   return router;
 }
