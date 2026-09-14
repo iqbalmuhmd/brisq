@@ -12,8 +12,14 @@ async function main() {
 }
 
 async function shutdown() {
-  await closeRabbitMQ();
-  process.exit(0);
+  try {
+    await closeRabbitMQ();
+    console.log("Worker shut down cleanly");
+  } catch (error) {
+    console.error("Error during shutdown:", error);
+  } finally {
+    process.exit(0);
+  }
 }
 
 process.on("SIGINT", shutdown);
