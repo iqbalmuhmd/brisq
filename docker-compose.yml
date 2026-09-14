@@ -74,6 +74,37 @@ services:
         - action: rebuild
           path: ./common/src
 
+  post:
+    build:
+      context: .
+      dockerfile: post/Dockerfile
+    container_name: brisq-post
+    ports:
+      - "3002:3002"
+    env_file:
+      - path: ./post/.env.development
+        required: true
+    environment:
+      - DATABASE_URL=postgresql://${POST_POSTGRES_USER}:${POST_POSTGRES_PASSWORD}@postgres-post:5432/${POST_POSTGRES_DB}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      - NODE_ENV=development
+    depends_on:
+      postgres-post:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./post/src
+          target: /app/post/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./post/package.json
+        - action: rebuild
+          path: ./common/src
+
   api-gateway:
     build:
       context: .
