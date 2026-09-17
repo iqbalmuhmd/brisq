@@ -1,6 +1,6 @@
 import "./config/env";
 import { connectRabbitMQ, closeRabbitMQ, getChannel } from "@brisq/common";
-import { startConsuming, getConsumerTag } from "./consumer";
+import { startConsuming, getConsumerTag, getInFlight } from "./consumer";
 
 async function main() {
   try {
@@ -18,6 +18,10 @@ async function shutdown() {
     const channel = getChannel();
     const tag = getConsumerTag();
     if (tag) await channel.cancel(tag);
+
+    const inFlight = getInFlight();
+    if (inFlight) await inFlight;
+
     await closeRabbitMQ();
     console.log("Worker shut down cleanly");
   } catch (error) {

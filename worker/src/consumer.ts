@@ -19,6 +19,7 @@ async function handleMessage(msg: ConsumeMessage | null) {
 }
 
 let currentConsumerTag: string | undefined;
+let inFlight: Promise<void> | undefined;
 
 export async function startConsuming() {
   const channel = getChannel();
@@ -27,7 +28,9 @@ export async function startConsuming() {
   const { consumerTag } = await channel.consume(
     "publish_jobs",
     (msg) => {
-      handleMessage(msg);
+      inFlight = handleMessage(msg).catch((err) => {
+        console.error("Unhandled error in handleMessage:", err);
+      });
     },
     { noAck: false },
   );
@@ -37,4 +40,8 @@ export async function startConsuming() {
 
 export function getConsumerTag() {
   return currentConsumerTag;
+}
+
+export function getInFlight() {
+  return inFlight;
 }
