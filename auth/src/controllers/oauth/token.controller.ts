@@ -12,7 +12,7 @@ export function buildTokenController(
     const { platform } = req.params;
     const userId = req.headers["x-user-id"] as string;
 
-    const accessToken = await linkedInService.getValidToken(
+    const { accessToken, personUrn } = await linkedInService.getValidToken(
       userId,
       platform as Platform,
     );
@@ -22,7 +22,11 @@ export function buildTokenController(
     res
       .status(200)
       .json(
-        new ApiResponse(true, "Token retrieved", { accessToken, platform }),
+        new ApiResponse(true, "Token retrieved", {
+          accessToken,
+          personUrn,
+          platform,
+        }),
       );
   };
 }

@@ -57,11 +57,29 @@ export function buildLinkedInService(
 
       const expiresAt = new Date(Date.now() + expires_in * 1000);
 
+      const userInfoResponse = await fetch(
+        "https://api.linkedin.com/v2/userinfo",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+      );
+
+      if (!userInfoResponse.ok) {
+        throw new InternalServerError("Failed to fetch LinkedIn user info");
+      }
+
+      const userInfo = await userInfoResponse.json();
+      const personUrn = userInfo.sub;
+
       await tokenRepository.upsertToken(
         userId,
         Platform.LINKEDIN,
         access_token,
         refresh_token,
+        personUrn,
         expiresAt,
       );
     },
@@ -73,7 +91,10 @@ export function buildLinkedInService(
       if (new Date() >= token.expiresAt)
         throw new InternalServerError("Token expired");
 
-      return token.accessToken;
+      return {
+        accessToken: token.accessToken,
+        personUrn: token.linkedInPersonUrn,
+      };
     },
     async getTokenStatus(userId: string, platform: Platform) {
       const token = await tokenRepository.getToken(userId, platform);

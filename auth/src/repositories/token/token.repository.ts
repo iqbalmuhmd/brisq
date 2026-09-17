@@ -8,12 +8,25 @@ export function buildTokenRepository(prisma: PrismaClient) {
       platform: Platform,
       accessToken: string,
       refreshToken: string | null,
+      personUrn: string | null,
       expiresAt: Date,
     ) => {
       return prisma.platformToken.upsert({
         where: { userId_platform: { userId, platform } },
-        update: { accessToken, refreshToken, expiresAt },
-        create: { userId, platform, accessToken, refreshToken, expiresAt },
+        update: {
+          accessToken,
+          refreshToken,
+          expiresAt,
+          linkedInPersonUrn: personUrn,
+        },
+        create: {
+          userId,
+          platform,
+          accessToken,
+          refreshToken,
+          expiresAt,
+          linkedInPersonUrn: personUrn,
+        },
       });
     },
 

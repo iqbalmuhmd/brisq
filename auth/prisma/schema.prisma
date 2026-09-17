@@ -26,6 +26,7 @@ model PlatformToken {
   platform     Platform
   accessToken  String
   refreshToken String?
+  linkedInPersonUrn String?
   expiresAt    DateTime
   user         User     @relation(fields: [userId], references: [id])
 

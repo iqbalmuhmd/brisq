@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: brisq-postgres-auth
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: ${AUTH_POSTGRES_USER}
       POSTGRES_PASSWORD: ${AUTH_POSTGRES_PASSWORD}
