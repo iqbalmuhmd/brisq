@@ -25,7 +25,9 @@ export function buildLinkedInClient() {
 
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(`Failed to post to LinkedIn: ${errorBody}`);
+        throw new Error(
+          `Failed to post to LinkedIn: ${response.status} - ${errorBody}`,
+        );
       }
     },
   };

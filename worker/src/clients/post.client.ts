@@ -23,7 +23,10 @@ export function buildPostClient() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update post platform status");
+        const errorBody = await response.text();
+        throw new Error(
+          `Failed to update post platform status: ${response.status} - ${errorBody}`,
+        );
       }
 
       const result = await response.json();

@@ -14,7 +14,10 @@ export function buildAuthClient() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch token from auth service");
+        const errorBody = await response.text();
+        throw new Error(
+          `Failed to fetch token: ${response.status} - ${errorBody}`,
+        );
       }
 
       const result = await response.json();
