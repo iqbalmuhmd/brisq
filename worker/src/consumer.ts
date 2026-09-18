@@ -1,6 +1,6 @@
 import { getChannel } from "@brisq/common";
 import { ConsumeMessage } from "amqplib";
-import { handlers } from "./handlers";
+import { handlers } from "./config/container";
 import { parseJobPayload } from "./entities/JobEntity";
 
 async function handleMessage(msg: ConsumeMessage | null) {
