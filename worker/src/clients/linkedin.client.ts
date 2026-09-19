@@ -1,3 +1,5 @@
+import { JobError } from "../errors";
+
 export function buildLinkedInClient() {
   return {
     async post(accessToken: string, personUrn: string, content: string) {
@@ -25,8 +27,14 @@ export function buildLinkedInClient() {
 
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(
+        const seconds = Number(response.headers.get("retry-after"));
+        const retryAfterMs =
+          Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined;
+
+        throw new JobError(
           `Failed to post to LinkedIn: ${response.status} - ${errorBody}`,
+          response.status,
+          retryAfterMs,
         );
       }
     },

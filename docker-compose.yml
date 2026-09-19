@@ -110,6 +110,7 @@ services:
       context: .
       dockerfile: worker/Dockerfile
     container_name: brisq-worker
+    stop_grace_period: 30s
     env_file:
       - path: ./worker/.env.development
         required: true
