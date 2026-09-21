@@ -32,6 +32,7 @@ model PostPlatformStatus {
   platform     Platform
   status       PostStatus @default(PENDING)
   errorMessage String?
+  errorCode    String?
   updatedAt    DateTime   @updatedAt
   post         Post       @relation(fields: [postId], references: [id])
 

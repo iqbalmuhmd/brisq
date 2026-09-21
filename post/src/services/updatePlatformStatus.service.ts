@@ -12,11 +12,22 @@ export function buildUpdatePlatformStatusService(
     platform: unknown,
     status: unknown,
     errorMessage: unknown,
+    errorCode: unknown,
   ) => {
     const parsedPlatform = parsePlatform(platform);
 
     if (status !== "SUCCEEDED" && status !== "FAILED") {
       throw new BadRequestError(`Invalid status: ${status}`);
+    }
+
+    let finalErrorCode: string | null = null;
+    if (status === "FAILED") {
+      if (typeof errorCode !== "string" || errorCode.trim().length === 0) {
+        throw new BadRequestError(
+          "errorCode must be a non-empty string when status is FAILED",
+        );
+      }
+      finalErrorCode = errorCode;
     }
 
     const finalErrorMessage =
@@ -28,6 +39,7 @@ export function buildUpdatePlatformStatusService(
         parsedPlatform,
         status as PostStatus,
         finalErrorMessage,
+        finalErrorCode,
       );
     } catch (err) {
       if (

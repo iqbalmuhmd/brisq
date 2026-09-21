@@ -28,10 +28,11 @@ export function buildPostRepository(prisma: PrismaClient) {
       platform: Platform,
       status: PostStatus,
       errorMessage: string | null,
+      errorCode: string | null,
     ) => {
       return prisma.postPlatformStatus.update({
         where: { postId_platform: { postId, platform } },
-        data: { status, errorMessage },
+        data: { status, errorMessage, errorCode },
       });
     },
 

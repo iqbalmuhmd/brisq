@@ -11,13 +11,14 @@ export function buildUpdatePlatformStatusController(
 ) {
   return async (req: Request, res: Response) => {
     const { postId } = req.params;
-    const { platform, status, errorMessage } = req.body;
+    const { platform, status, errorMessage, errorCode } = req.body;
 
     const result = await updatePlatformStatusService(
       postId as string,
       platform,
       status,
       errorMessage,
+      errorCode,
     );
 
     res
