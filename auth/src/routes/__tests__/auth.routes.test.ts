@@ -11,16 +11,12 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-async function loginAndGetCookie() {
-  await request(app)
-    .post("/auth/register")
-    .send({ email: "test@example.com", password: "password123" });
-
+async function registerAndGetUserId(email = "test@example.com") {
   const res = await request(app)
-    .post("/auth/login")
-    .send({ email: "test@example.com", password: "password123" });
+    .post("/auth/register")
+    .send({ email, password: "password123" });
 
-  return res.headers["set-cookie"];
+  return res.body.data.userId as string;
 }
 
 describe("POST /auth/register", () => {
@@ -125,16 +121,19 @@ describe("GET /auth/verify", () => {
 
 describe("GET /auth/linkedin", () => {
   it("returns 200 with an auth url and sets a state cookie", async () => {
-    const cookie = await loginAndGetCookie();
+    const userId = await registerAndGetUserId();
 
-    const res = await request(app).get("/auth/linkedin").set("Cookie", cookie);
+    const res = await request(app)
+      .get("/auth/linkedin")
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("url");
     expect(res.headers["set-cookie"]).toBeDefined();
   });
 
-  it("returns 401 without a login cookie", async () => {
+  it("returns 401 without gateway headers", async () => {
     const res = await request(app).get("/auth/linkedin");
 
     expect(res.status).toBe(401);
@@ -151,12 +150,13 @@ describe("GET /auth/linkedin/callback", () => {
       }),
     } as Response);
 
-    const cookie = await loginAndGetCookie();
-    const cookies = [...cookie, "state=test-state"];
+    const userId = await registerAndGetUserId();
 
     const res = await request(app)
       .get("/auth/linkedin/callback?code=some-code&state=test-state")
-      .set("Cookie", cookies);
+      .set("Cookie", "state=test-state")
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty("status", "connected");
@@ -168,12 +168,13 @@ describe("GET /auth/linkedin/callback", () => {
   });
 
   it("returns 403 when the state does not match", async () => {
-    const cookie = await loginAndGetCookie();
-    const cookies = [...cookie, "state=test-state"];
+    const userId = await registerAndGetUserId();
 
     const res = await request(app)
       .get("/auth/linkedin/callback?code=some-code&state=wrong-state")
-      .set("Cookie", cookies);
+      .set("Cookie", "state=test-state")
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
 
     expect(res.status).toBe(403);
   });
@@ -181,22 +182,22 @@ describe("GET /auth/linkedin/callback", () => {
 
 describe("GET /auth/linkedin/status/:platform", () => {
   it("returns connected false when there is no token", async () => {
-    const cookie = await loginAndGetCookie();
+    const userId = await registerAndGetUserId();
 
     const res = await request(app)
       .get("/auth/linkedin/status/LINKEDIN")
-      .set("Cookie", cookie);
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual({ connected: false });
   });
 
   it("returns connected true with expiresAt when a token exists", async () => {
-    const cookie = await loginAndGetCookie();
-    const user = await prisma.user.findFirstOrThrow();
+    const userId = await registerAndGetUserId();
     await prisma.platformToken.create({
       data: {
-        userId: user.id,
+        userId,
         platform: "LINKEDIN",
         accessToken: "the-access-token",
         expiresAt: new Date(Date.now() + 60 * 60 * 1000),
@@ -205,14 +206,15 @@ describe("GET /auth/linkedin/status/:platform", () => {
 
     const res = await request(app)
       .get("/auth/linkedin/status/LINKEDIN")
-      .set("Cookie", cookie);
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
     expect(res.body.data.connected).toBe(true);
     expect(res.body.data).toHaveProperty("expiresAt");
   });
 
-  it("returns 401 without a login cookie", async () => {
+  it("returns 401 without gateway headers", async () => {
     const res = await request(app).get("/auth/linkedin/status/LINKEDIN");
 
     expect(res.status).toBe(401);
