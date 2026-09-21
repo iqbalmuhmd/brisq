@@ -11,6 +11,7 @@ import { buildTokenRepository } from "../repositories/token/token.repository";
 import { buildLinkedInCallbackController } from "../controllers/oauth/linkedin.callback.controller";
 import { buildTokenController } from "../controllers/oauth/token.controller";
 import { buildLinkedInStatusController } from "../controllers/oauth/linkedin.status.controller";
+import { buildInvalidateTokenController } from "../controllers/oauth/invalidateToken.controller";
 import { config } from "./env";
 import { buildLogger } from "@brisq/common";
 
@@ -38,6 +39,10 @@ export const linkedInCallbackController =
 
 export const tokenController = buildTokenController(linkedInService, logger);
 export const linkedinStatusController = buildLinkedInStatusController(
+  linkedInService,
+  logger,
+);
+export const invalidateTokenController = buildInvalidateTokenController(
   linkedInService,
   logger,
 );

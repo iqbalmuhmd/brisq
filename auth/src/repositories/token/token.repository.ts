@@ -41,5 +41,14 @@ export function buildTokenRepository(prisma: PrismaClient) {
         where: { userId_platform: { userId, platform } },
       });
     },
+    invalidateToken: async (
+      userId: string,
+      platform: Platform,
+      accessToken: string,
+    ) => {
+      return prisma.platformToken.deleteMany({
+        where: { userId, platform, accessToken },
+      });
+    },
   };
 }

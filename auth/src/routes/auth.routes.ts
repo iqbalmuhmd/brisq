@@ -13,6 +13,7 @@ export function buildAuthRouter(deps: {
   linkedInCallbackController: RequestHandler;
   tokenController: RequestHandler;
   linkedinStatusController: RequestHandler;
+  invalidateTokenController: RequestHandler;
 }) {
   const router = Router();
 
@@ -37,6 +38,12 @@ export function buildAuthRouter(deps: {
     interServiceMiddleware,
     userContextMiddleware,
     deps.linkedinStatusController,
+  );
+  router.post(
+    "/token/:platform/invalidate",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.invalidateTokenController,
   );
 
   return router;
