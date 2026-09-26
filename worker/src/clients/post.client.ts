@@ -7,6 +7,7 @@ export function buildPostClient() {
       platform: string,
       status: string,
       errorMessage: string | null,
+      errorCode: string | null,
       userId: string,
     ) {
       const response = await fetch(
@@ -18,7 +19,7 @@ export function buildPostClient() {
             "x-internal-secret": config.interServiceSecret,
             "x-user-id": userId,
           },
-          body: JSON.stringify({ platform, status, errorMessage }),
+          body: JSON.stringify({ platform, status, errorMessage, errorCode }),
         },
       );
 
