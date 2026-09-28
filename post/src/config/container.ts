@@ -4,7 +4,6 @@ import { buildPublishService } from "../services/publish.service";
 import { buildPublishController } from "../controllers/publish.controller";
 import { jobPublisher } from "../messaging/jobPublisher";
 import { buildUpdatePlatformStatusService } from "../services/updatePlatformStatus.service";
-import { buildUpdatePlatformStatusController } from "../controllers/updatePlatformStatus.controller";
 import { buildGetPostsService } from "../services/getPosts.service";
 import { buildGetPostsController } from "../controllers/getPosts.controller";
 import { buildGetPostService } from "../services/getPost.service";
@@ -28,8 +27,6 @@ const retryPublishService = buildRetryPublishService(
 export const statusConsumer = buildStatusConsumer(updatePlatformStatusService);
 
 export const publishController = buildPublishController(publishService);
-export const updatePlatformStatusController =
-  buildUpdatePlatformStatusController(updatePlatformStatusService);
 export const getPostsController = buildGetPostsController(getPostsService);
 export const getPostController = buildGetPostController(getPostService);
 export const retryPublishController =

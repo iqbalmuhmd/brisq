@@ -3,7 +3,6 @@ import { errorHandler } from "@brisq/common";
 import { buildPostRouter } from "./routes/post.routes";
 import {
   publishController,
-  updatePlatformStatusController,
   getPostsController,
   getPostController,
   retryPublishController,
@@ -17,7 +16,6 @@ app.use(
   "/posts",
   buildPostRouter({
     publishController,
-    updatePlatformStatusController,
     getPostsController,
     getPostController,
     retryPublishController,

@@ -3,7 +3,6 @@ import { userContextMiddleware, interServiceMiddleware } from "@brisq/common";
 
 export function buildPostRouter(deps: {
   publishController: RequestHandler;
-  updatePlatformStatusController: RequestHandler;
   getPostsController: RequestHandler;
   getPostController: RequestHandler;
   retryPublishController: RequestHandler;
@@ -14,13 +13,6 @@ export function buildPostRouter(deps: {
     interServiceMiddleware,
     userContextMiddleware,
     deps.publishController,
-  );
-
-  router.patch(
-    "/:postId/platform-status",
-    interServiceMiddleware,
-    userContextMiddleware,
-    deps.updatePlatformStatusController,
   );
 
   router.post(
