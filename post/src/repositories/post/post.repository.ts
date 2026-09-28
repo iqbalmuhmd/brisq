@@ -36,6 +36,27 @@ export function buildPostRepository(prisma: PrismaClient) {
       });
     },
 
+    retryPlatformStatus: async (
+      postId: string,
+      platform: Platform,
+      userId: string,
+    ) => {
+      return prisma.postPlatformStatus.updateMany({
+        where: {
+          postId,
+          platform,
+          status: "FAILED",
+          errorCode: "ACCESS_TOKEN_DEAD",
+          post: { userId },
+        },
+        data: {
+          status: "PENDING",
+          errorCode: null,
+          errorMessage: null,
+        },
+      });
+    },
+
     findManyByUser: async (userId: string) => {
       return prisma.post.findMany({
         where: { userId },
