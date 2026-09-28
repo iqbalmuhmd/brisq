@@ -1,19 +1,19 @@
-import { IJobPayload } from "@brisq/common";
+import { IJobPayload, IStatusUpdate } from "@brisq/common";
 import { buildAuthClient } from "../clients/auth.client";
 import { buildLinkedInClient } from "../clients/linkedin.client";
-import { buildPostClient } from "../clients/post.client";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
 import { JobError } from "../errors";
 import { markTokenDeadAndFail } from "./markTokenDeadAndFail";
 
 type AuthClient = ReturnType<typeof buildAuthClient>;
 type LinkedInClient = ReturnType<typeof buildLinkedInClient>;
-type PostClient = ReturnType<typeof buildPostClient>;
+
+type PublishStatusUpdate = (update: IStatusUpdate) => Promise<void>;
 
 export function buildLinkedInHandler(
   authClient: AuthClient,
   linkedInClient: LinkedInClient,
-  postClient: PostClient,
+  publishStatusUpdate: PublishStatusUpdate,
 ) {
   return async (job: IJobPayload) => {
     let accessToken: string;
@@ -29,14 +29,19 @@ export function buildLinkedInHandler(
         err.status === 404 &&
         err.code === "TOKEN_DEAD"
       ) {
-        await markTokenDeadAndFail(postClient, authClient, job);
+        await markTokenDeadAndFail(publishStatusUpdate, authClient, job);
         return;
       }
       throw err;
     }
 
     if (!personUrn) {
-      await markTokenDeadAndFail(postClient, authClient, job, accessToken);
+      await markTokenDeadAndFail(
+        publishStatusUpdate,
+        authClient,
+        job,
+        accessToken,
+      );
       return;
     }
 
@@ -48,19 +53,21 @@ export function buildLinkedInHandler(
       );
     } catch (err) {
       if (err instanceof JobError && err.status === 401) {
-        await markTokenDeadAndFail(postClient, authClient, job, accessToken);
+        await markTokenDeadAndFail(
+          publishStatusUpdate,
+          authClient,
+          job,
+          accessToken,
+        );
         return;
       }
       throw err;
     }
 
-    await postClient.updateStatus(
-      job.postId,
-      job.platform,
-      "SUCCEEDED",
-      null,
-      null,
-      job.userId,
-    );
+    await publishStatusUpdate({
+      postId: job.postId,
+      platform: job.platform,
+      status: "SUCCEEDED",
+    });
   };
 }

@@ -1,12 +1,11 @@
-import { IJobPayload } from "@brisq/common";
+import { IJobPayload, IStatusUpdate } from "@brisq/common";
 import { buildAuthClient } from "../clients/auth.client";
-import { buildPostClient } from "../clients/post.client";
 
 type AuthClient = ReturnType<typeof buildAuthClient>;
-type PostClient = ReturnType<typeof buildPostClient>;
+type PublishStatusUpdate = (update: IStatusUpdate) => Promise<void>;
 
 export async function markTokenDeadAndFail(
-  postClient: PostClient,
+  publishStatusUpdate: PublishStatusUpdate,
   authClient: AuthClient,
   job: IJobPayload,
   deadToken?: string,
@@ -23,12 +22,11 @@ export async function markTokenDeadAndFail(
     }
   }
 
-  await postClient.updateStatus(
-    job.postId,
-    job.platform,
-    "FAILED",
-    "LinkedIn session expired — reconnect to retry",
-    "ACCESS_TOKEN_DEAD",
-    job.userId,
-  );
+  await publishStatusUpdate({
+    postId: job.postId,
+    platform: job.platform,
+    status: "FAILED",
+    errorCode: "ACCESS_TOKEN_DEAD",
+    errorMessage: "LinkedIn session expired — reconnect to retry",
+  });
 }
