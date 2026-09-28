@@ -30,8 +30,8 @@ export function buildPostRepository(prisma: PrismaClient) {
       errorMessage: string | null,
       errorCode: string | null,
     ) => {
-      return prisma.postPlatformStatus.update({
-        where: { postId_platform: { postId, platform } },
+      return prisma.postPlatformStatus.updateMany({
+        where: { postId, platform, status: { not: "SUCCEEDED" } },
         data: { status, errorMessage, errorCode },
       });
     },
