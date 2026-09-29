@@ -5,6 +5,7 @@ export function buildLinkedInClient() {
     async post(accessToken: string, personUrn: string, content: string) {
       const response = await fetch("https://api.linkedin.com/v2/ugcPosts", {
         method: "POST",
+        signal: AbortSignal.timeout(10000),
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
