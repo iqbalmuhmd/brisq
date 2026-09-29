@@ -2,7 +2,7 @@ import { IJobPayload, IStatusUpdate } from "@brisq/common";
 import { buildAuthClient } from "../clients/auth.client";
 import { buildLinkedInClient } from "../clients/linkedin.client";
 import { retryWithBackoff } from "../utils/retryWithBackoff";
-import { JobError } from "../errors";
+import { JobError, StatusSyncError, UnknownOutcomeError } from "../errors";
 import { markTokenDeadAndFail } from "./markTokenDeadAndFail";
 
 type AuthClient = ReturnType<typeof buildAuthClient>;
@@ -61,13 +61,22 @@ export function buildLinkedInHandler(
         );
         return;
       }
+      if (!(err instanceof JobError) || [500, 502, 504].includes(err.status)) {
+        throw new UnknownOutcomeError("LinkedIn post outcome unknown", err);
+      }
       throw err;
     }
-
-    await publishStatusUpdate({
-      postId: job.postId,
-      platform: job.platform,
-      status: "SUCCEEDED",
-    });
+    try {
+      await publishStatusUpdate({
+        postId: job.postId,
+        platform: job.platform,
+        status: "SUCCEEDED",
+      });
+    } catch (err) {
+      throw new StatusSyncError(
+        "The LinkedIn operation succeeded. The status synchronization operation failed.",
+        err,
+      );
+    }
   };
 }
