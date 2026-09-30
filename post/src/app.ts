@@ -6,6 +6,7 @@ import {
   getPostsController,
   getPostController,
   retryPublishController,
+  getPlatformStatusController,
 } from "./config/container";
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(
     getPostsController,
     getPostController,
     retryPublishController,
+    getPlatformStatusController,
   }),
 );
 

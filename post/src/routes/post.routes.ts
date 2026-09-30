@@ -6,6 +6,7 @@ export function buildPostRouter(deps: {
   getPostsController: RequestHandler;
   getPostController: RequestHandler;
   retryPublishController: RequestHandler;
+  getPlatformStatusController: RequestHandler;
 }) {
   const router = Router();
   router.post(
@@ -20,6 +21,12 @@ export function buildPostRouter(deps: {
     interServiceMiddleware,
     userContextMiddleware,
     deps.retryPublishController,
+  );
+
+  router.get(
+    "/:postId/platforms/:platform/status",
+    interServiceMiddleware,
+    deps.getPlatformStatusController,
   );
 
   router.get(

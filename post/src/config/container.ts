@@ -11,6 +11,8 @@ import { buildGetPostController } from "../controllers/getPost.controller";
 import { buildRetryPublishService } from "../services/retryPublish.service";
 import { buildRetryPublishController } from "../controllers/retryPublish.controller";
 import { buildStatusConsumer } from "../messaging/statusConsumer";
+import { buildGetPlatformStatusService } from "../services/getPlatformStatus.service";
+import { buildGetPlatformStatusController } from "../controllers/getPlatformStatus.controller";
 
 const postRepository = buildPostRepository(prisma);
 
@@ -23,6 +25,7 @@ const retryPublishService = buildRetryPublishService(
   postRepository,
   jobPublisher,
 );
+const getPlatformStatusService = buildGetPlatformStatusService(postRepository);
 
 export const statusConsumer = buildStatusConsumer(updatePlatformStatusService);
 
@@ -31,3 +34,6 @@ export const getPostsController = buildGetPostsController(getPostsService);
 export const getPostController = buildGetPostController(getPostService);
 export const retryPublishController =
   buildRetryPublishController(retryPublishService);
+export const getPlatformStatusController = buildGetPlatformStatusController(
+  getPlatformStatusService,
+);

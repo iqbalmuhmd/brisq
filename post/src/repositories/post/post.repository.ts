@@ -23,6 +23,12 @@ export function buildPostRepository(prisma: PrismaClient) {
       });
     },
 
+    getPlatformStatus: async (postId: string, platform: Platform) => {
+      return prisma.postPlatformStatus.findUnique({
+        where: { postId_platform: { postId, platform } },
+      });
+    },
+
     updatePlatformStatus: async (
       postId: string,
       platform: Platform,
