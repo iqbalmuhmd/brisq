@@ -13,7 +13,12 @@ async function main() {
   }
 }
 
-async function shutdown() {
+let shuttingDown = false;
+
+async function shutdown(signal: string) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
   try {
     const channel = getChannel();
     const tag = jobConsumer.getConsumerTag();
@@ -23,7 +28,7 @@ async function shutdown() {
     if (inFlight) await inFlight;
 
     await closeRabbitMQ();
-    console.log("Worker shut down cleanly");
+    console.log("Worker shut down cleanly", { signal });
   } catch (error) {
     console.error("Error during shutdown:", error);
   } finally {
@@ -31,7 +36,7 @@ async function shutdown() {
   }
 }
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGINT", () => void shutdown("SIGINT"));
+process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
 main();
