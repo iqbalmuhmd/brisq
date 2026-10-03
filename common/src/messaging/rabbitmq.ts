@@ -84,3 +84,24 @@ export function publishWithConfirm(
     );
   });
 }
+
+export function publishToExchangeWithConfirm(
+  exchange: string,
+  payload: unknown,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getChannel().publish(
+      exchange,
+      "",
+      Buffer.from(JSON.stringify(payload)),
+      { persistent: true },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      },
+    );
+  });
+}
