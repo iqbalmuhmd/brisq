@@ -1,13 +1,13 @@
 import { getChannel, statusUpdateSchema } from "@brisq/common";
 import { ConsumeMessage } from "amqplib";
-import { buildUpdatePlatformStatusService } from "../services/updatePlatformStatus.service";
+import { buildRecordPublishResultService } from "../services/recordPublishResult.service";
 
-type UpdatePlatformStatusService = ReturnType<
-  typeof buildUpdatePlatformStatusService
+type RecordPublishResultService = ReturnType<
+  typeof buildRecordPublishResultService
 >;
 
 export function buildStatusConsumer(
-  updatePlatformStatusService: UpdatePlatformStatusService,
+  recordPublishResultService: RecordPublishResultService,
 ) {
   let currentConsumerTag: string | undefined;
   let inFlight: Promise<void> | undefined;
@@ -42,7 +42,7 @@ export function buildStatusConsumer(
       update.status === "FAILED" ? update.errorMessage : null;
 
     try {
-      const dbResult = await updatePlatformStatusService(
+      const dbResult = await recordPublishResultService(
         update.postId,
         update.platform,
         update.status,

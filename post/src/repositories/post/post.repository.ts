@@ -77,5 +77,12 @@ export function buildPostRepository(prisma: PrismaClient) {
         include: { platformStatuses: true },
       });
     },
+
+    findPostOwner: async (postId: string) => {
+      return prisma.post.findUnique({
+        where: { id: postId },
+        select: { userId: true },
+      });
+    },
   };
 }
