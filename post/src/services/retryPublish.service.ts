@@ -3,7 +3,7 @@ import { IJobPayload, parsePlatform, NotFoundError } from "@brisq/common";
 import { buildPostRepository } from "../repositories/post/post.repository";
 
 type PostRepository = ReturnType<typeof buildPostRepository>;
-type PublishJob = (payload: IJobPayload) => void;
+type PublishJob = (payload: IJobPayload) => Promise<void>;
 
 export function buildRetryPublishService(
   postRepository: PostRepository,
@@ -24,7 +24,7 @@ export function buildRetryPublishService(
 
     const post = await postRepository.findByIdForUser(postId, userId);
 
-    publishJob({
+    await publishJob({
       jobId: randomUUID(),
       postId: post!.id,
       userId,
