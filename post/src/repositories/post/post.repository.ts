@@ -37,7 +37,7 @@ export function buildPostRepository(prisma: PrismaClient) {
       errorCode: string | null,
     ) => {
       return prisma.postPlatformStatus.updateMany({
-        where: { postId, platform, status: { not: "SUCCEEDED" } },
+        where: { postId, platform, status: { not: "PENDING" } },
         data: { status, errorMessage, errorCode },
       });
     },
