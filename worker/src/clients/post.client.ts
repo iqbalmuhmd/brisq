@@ -2,6 +2,11 @@ import { Platform } from "@brisq/common";
 import { config } from "../config/env";
 import { JobError } from "../errors";
 
+export type PostStatusResult = {
+  status: "PENDING" | "SUCCEEDED" | "FAILED";
+  errorCode: string | null;
+};
+
 export function buildPostClient() {
   return {
     async getStatus(postId: string, platform: Platform) {
@@ -22,10 +27,7 @@ export function buildPostClient() {
         );
       }
       const result = await response.json();
-      return result.data as {
-        status: "PENDING" | "SUCCEEDED" | "FAILED";
-        errorCode: string | null;
-      };
+      return result.data as PostStatusResult;
     },
   };
 }

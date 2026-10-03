@@ -4,11 +4,13 @@ import { buildLinkedInClient } from "../clients/linkedin.client";
 import { publishStatusUpdate } from "../messaging/statusPublisher";
 import { buildLinkedInHandler } from "../handlers/linkedin.handler";
 import { buildJobConsumer } from "../messaging/jobConsumer";
+import { buildPostClient } from "../clients/post.client";
 
 type JobHandler = (job: IJobPayload) => Promise<void>;
 
 const authClient = buildAuthClient();
 const linkedInClient = buildLinkedInClient();
+const postClient = buildPostClient();
 
 const linkedInHandler = buildLinkedInHandler(
   authClient,
@@ -24,4 +26,5 @@ export const jobConsumer = buildJobConsumer(
   handlers,
   publishStatusUpdate,
   getChannel,
+  postClient,
 );
