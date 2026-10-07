@@ -6,6 +6,7 @@ loadEnv([
   "PORT",
   "AUTH_SERVICE_URL",
   "POST_SERVICE_URL",
+  "ASSET_SERVICE_URL",
   "JWT_SECRET",
   "INTER_SERVICE_SECRET",
 ]);
@@ -17,6 +18,9 @@ export const config = {
   },
   post_service: {
     url: process.env.POST_SERVICE_URL,
+  },
+  asset_service: {
+    url: process.env.ASSET_SERVICE_URL,
   },
 
   jwt: {

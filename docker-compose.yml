@@ -132,6 +132,30 @@ services:
         - action: rebuild
           path: ./common/src
 
+  asset:
+    build:
+      context: .
+      dockerfile: asset/Dockerfile
+    container_name: brisq-asset
+    ports:
+      - "3003:3003"
+    env_file:
+      - path: ./asset/.env.development
+        required: true
+    environment:
+      - NODE_ENV=development
+    develop:
+      watch:
+        - action: sync
+          path: ./asset/src
+          target: /app/asset/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./asset/package.json
+        - action: rebuild
+          path: ./common/src
+
   api-gateway:
     build:
       context: .
