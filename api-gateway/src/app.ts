@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes";
 import postRouter from "./routes/post.routes";
+import assetRouter from "./routes/asset.routes";
 import { errorHandler } from "@brisq/common";
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use("/posts", postRouter);
+app.use("/assets", assetRouter);
 
 app.use(errorHandler);
 
