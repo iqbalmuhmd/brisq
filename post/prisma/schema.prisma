@@ -21,7 +21,7 @@ model Post {
   id               String               @id @default(cuid())
   userId           String
   content          String
-  imageUrl         String?
+  imageKey         String?
   createdAt        DateTime             @default(now())
   platformStatuses PostPlatformStatus[]
 }

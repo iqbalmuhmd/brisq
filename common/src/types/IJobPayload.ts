@@ -6,5 +6,5 @@ export interface IJobPayload {
   userId: string;
   platform: Platform;
   content: string;
-  imageUrl?: string;
+  imageKey?: string;
 }

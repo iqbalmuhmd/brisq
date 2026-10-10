@@ -9,14 +9,14 @@ export function buildPostRepository(prisma: PrismaClient) {
     create: async (
       userId: string,
       content: string,
-      imageUrl: string | null,
+      imageKey: string | null,
       platformStatuses: { platform: Platform }[],
     ) => {
       return prisma.post.create({
         data: {
           userId,
           content,
-          imageUrl,
+          imageKey,
           platformStatuses: { create: platformStatuses },
         },
         include: { platformStatuses: true },

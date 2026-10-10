@@ -7,7 +7,7 @@ const jobSchema = z.object({
   userId: z.string(),
   platform: z.nativeEnum(Platform),
   content: z.string(),
-  imageUrl: z.string().optional(),
+  imageKey: z.string().optional(),
 });
 
 export function parseJobPayload(raw: unknown): IJobPayload {

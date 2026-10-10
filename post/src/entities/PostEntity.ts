@@ -1,15 +1,15 @@
 import { Platform, parsePlatform, BadRequestError } from "@brisq/common";
 import { Platform as PrismaPlatform } from "../../generated/prisma/client";
 
-const S3_URL_PATTERN =
-  /^https:\/\/[a-z0-9.\-]+\.s3[.\-][a-z0-9-]+\.amazonaws\.com\/.+$/i;
+const IMAGE_KEY_PATTERN =
+  /^uploads\/[^/]+\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png)$/i;
 
 export class PostEntity {
   private readonly _content: string;
   private readonly _platforms: Platform[];
-  private readonly _imageUrl?: string;
+  private readonly _imageKey?: string;
 
-  constructor(content: unknown, platforms: unknown, imageUrl?: unknown) {
+  constructor(content: unknown, platforms: unknown, imageKey?: unknown) {
     if (typeof content !== "string" || content.trim().length === 0) {
       throw new BadRequestError("Content cannot be empty");
     }
@@ -19,15 +19,17 @@ export class PostEntity {
     }
     const parsedPlatforms = platforms.map(parsePlatform);
 
-    if (imageUrl !== undefined) {
-      if (typeof imageUrl !== "string" || !S3_URL_PATTERN.test(imageUrl)) {
-        throw new BadRequestError("imageUrl must be a valid S3 URL");
+    if (imageKey !== undefined) {
+      if (typeof imageKey !== "string" || !IMAGE_KEY_PATTERN.test(imageKey)) {
+        throw new BadRequestError(
+          "imageKey must match uploads/{userId}/{uuid}.jpg or uploads/{userId}/{uuid}.png",
+        );
       }
     }
 
     this._content = content;
     this._platforms = parsedPlatforms;
-    this._imageUrl = imageUrl as string | undefined;
+    this._imageKey = imageKey as string | undefined;
   }
 
   get content() {
@@ -36,15 +38,15 @@ export class PostEntity {
   get platforms() {
     return this._platforms;
   }
-  get imageUrl() {
-    return this._imageUrl;
+  get imageKey() {
+    return this._imageKey;
   }
 
   toPersisted(userId: string) {
     return Object.freeze({
       userId,
       content: this._content,
-      imageUrl: this._imageUrl,
+      imageKey: this._imageKey,
     });
   }
 

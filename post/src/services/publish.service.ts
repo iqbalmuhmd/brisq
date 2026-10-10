@@ -14,14 +14,14 @@ export function buildPublishService(
     userId: string,
     content: unknown,
     platforms: unknown,
-    imageUrl?: unknown,
+    imageKey?: unknown,
   ) => {
-    const postEntity = new PostEntity(content, platforms, imageUrl);
+    const postEntity = new PostEntity(content, platforms, imageKey);
 
     const post = await postRepository.create(
       userId,
       postEntity.content,
-      postEntity.imageUrl ?? null,
+      postEntity.imageKey ?? null,
       postEntity.toPlatformStatuses(),
     );
 
@@ -32,7 +32,7 @@ export function buildPublishService(
         userId,
         platform,
         content: postEntity.content,
-        imageUrl: postEntity.imageUrl,
+        imageKey: postEntity.imageKey,
       });
     }
 
