@@ -16,7 +16,7 @@ export function buildPublishService(
     platforms: unknown,
     imageKey?: unknown,
   ) => {
-    const postEntity = new PostEntity(content, platforms, imageKey);
+    const postEntity = new PostEntity(userId, content, platforms, imageKey);
 
     const post = await postRepository.create(
       userId,

@@ -9,7 +9,12 @@ export class PostEntity {
   private readonly _platforms: Platform[];
   private readonly _imageKey?: string;
 
-  constructor(content: unknown, platforms: unknown, imageKey?: unknown) {
+  constructor(
+    userId: string,
+    content: unknown,
+    platforms: unknown,
+    imageKey?: unknown,
+  ) {
     if (typeof content !== "string" || content.trim().length === 0) {
       throw new BadRequestError("Content cannot be empty");
     }
@@ -23,6 +28,11 @@ export class PostEntity {
       if (typeof imageKey !== "string" || !IMAGE_KEY_PATTERN.test(imageKey)) {
         throw new BadRequestError(
           "imageKey must match uploads/{userId}/{uuid}.jpg or uploads/{userId}/{uuid}.png",
+        );
+      }
+      if (!imageKey.startsWith(`uploads/${userId}/`)) {
+        throw new BadRequestError(
+          "imageKey does not belong to the current user",
         );
       }
     }
