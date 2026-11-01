@@ -46,6 +46,18 @@ export function buildLinkedInClient() {
       return { uploadUrl: data.value.uploadUrl, imageUrn: data.value.image };
     },
 
+    async uploadImage(accessToken: string, uploadUrl: string, bytes: Buffer) {
+      const response = await fetch(uploadUrl, {
+        method: "PUT",
+        signal: AbortSignal.timeout(30000),
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: new Uint8Array(bytes),
+      });
+      await throwIfNotOk(response, "upload image to LinkedIn");
+    },
+
     async post(accessToken: string, personUrn: string, content: string) {
       const response = await fetch("https://api.linkedin.com/rest/posts", {
         method: "POST",
