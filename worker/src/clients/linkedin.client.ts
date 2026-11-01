@@ -1,4 +1,5 @@
 import { JobError } from "../errors";
+import { escapeLittleText } from "../utils/escapeLittleText";
 
 const LINKEDIN_VERSION = "202609";
 
@@ -16,7 +17,7 @@ export function buildLinkedInClient() {
         },
         body: JSON.stringify({
           author: `urn:li:person:${personUrn}`,
-          commentary: content,
+          commentary: escapeLittleText(content),
           lifecycleState: "PUBLISHED",
           distribution: {
             feedDistribution: "MAIN_FEED",
