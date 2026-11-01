@@ -3,6 +3,21 @@ import { escapeLittleText } from "../utils/escapeLittleText";
 
 const LINKEDIN_VERSION = "202609";
 
+async function throwIfNotOk(response: Response, action: string): Promise<void> {
+  if (response.ok) return;
+
+  const errorBody = await response.text();
+  const seconds = Number(response.headers.get("retry-after"));
+  const retryAfterMs =
+    Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined;
+
+  throw new JobError(
+    `Failed to ${action}: ${response.status} - ${errorBody}`,
+    response.status,
+    retryAfterMs,
+  );
+}
+
 export function buildLinkedInClient() {
   return {
     async post(accessToken: string, personUrn: string, content: string) {
@@ -29,18 +44,7 @@ export function buildLinkedInClient() {
         }),
       });
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        const seconds = Number(response.headers.get("retry-after"));
-        const retryAfterMs =
-          Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : undefined;
-
-        throw new JobError(
-          `Failed to post to LinkedIn: ${response.status} - ${errorBody}`,
-          response.status,
-          retryAfterMs,
-        );
-      }
+      await throwIfNotOk(response, "post to LinkedIn");
     },
   };
 }
