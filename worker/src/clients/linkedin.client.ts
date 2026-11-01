@@ -1,28 +1,30 @@
 import { JobError } from "../errors";
 
+const LINKEDIN_VERSION = "202609";
+
 export function buildLinkedInClient() {
   return {
     async post(accessToken: string, personUrn: string, content: string) {
-      const response = await fetch("https://api.linkedin.com/v2/ugcPosts", {
+      const response = await fetch("https://api.linkedin.com/rest/posts", {
         method: "POST",
         signal: AbortSignal.timeout(10000),
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
           "X-Restli-Protocol-Version": "2.0.0",
+          "Linkedin-Version": LINKEDIN_VERSION,
         },
         body: JSON.stringify({
           author: `urn:li:person:${personUrn}`,
+          commentary: content,
           lifecycleState: "PUBLISHED",
-          specificContent: {
-            "com.linkedin.ugc.ShareContent": {
-              shareCommentary: { text: content },
-              shareMediaCategory: "NONE",
-            },
+          distribution: {
+            feedDistribution: "MAIN_FEED",
+            targetEntities: [],
+            thirdPartyDistributionChannels: [],
           },
-          visibility: {
-            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
-          },
+          isReshareDisabledByAuthor: false,
+          visibility: "PUBLIC",
         }),
       });
 
