@@ -20,6 +20,32 @@ async function throwIfNotOk(response: Response, action: string): Promise<void> {
 
 export function buildLinkedInClient() {
   return {
+    async initializeImageUpload(accessToken: string, personUrn: string) {
+      const response = await fetch(
+        "https://api.linkedin.com/rest/images?action=initializeUpload",
+        {
+          method: "POST",
+          signal: AbortSignal.timeout(10000),
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+            "X-Restli-Protocol-Version": "2.0.0",
+            "Linkedin-Version": LINKEDIN_VERSION,
+          },
+          body: JSON.stringify({
+            initializeUploadRequest: { owner: `urn:li:person:${personUrn}` },
+          }),
+        },
+      );
+      await throwIfNotOk(response, "initialize LinkedIn image upload");
+
+      const data = (await response.json()) as {
+        value: { uploadUrl: string; image: string };
+      };
+
+      return { uploadUrl: data.value.uploadUrl, imageUrn: data.value.image };
+    },
+
     async post(accessToken: string, personUrn: string, content: string) {
       const response = await fetch("https://api.linkedin.com/rest/posts", {
         method: "POST",
