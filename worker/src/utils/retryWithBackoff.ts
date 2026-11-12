@@ -1,6 +1,7 @@
 import { JobError } from "../errors";
 
 const RETRYABLE_STATUSES = new Set([429, 503]);
+export const RETRYABLE_STATUSES_UPLOAD = new Set([429, 500, 502, 503, 504]);
 const MAX_WAIT_MS = 8000;
 
 const sleep = (ms: number) =>
@@ -10,12 +11,13 @@ export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number,
   baseDelayMs: number,
+  retryableStatuses: Set<number> = RETRYABLE_STATUSES,
 ): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
       return await fn();
     } catch (err) {
-      if (!(err instanceof JobError) || !RETRYABLE_STATUSES.has(err.status)) {
+      if (!(err instanceof JobError) || !retryableStatuses.has(err.status)) {
         throw err;
       }
       if (attempt >= maxRetries) throw err;
