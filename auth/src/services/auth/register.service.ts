@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { ConflictError, UserEntity } from "@brisq/common";
+import { ConflictError } from "@brisq/common";
+import { UserEntity } from "../../entities/UserEntity";
 import { buildUserRepository } from "../../repositories/auth/user.repository";
 
 type UserRepository = ReturnType<typeof buildUserRepository>;

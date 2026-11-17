@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BadRequestError } from "../errors";
+import { BadRequestError } from "@brisq/common";
 
 const userSchema = z.object({
   email: z
