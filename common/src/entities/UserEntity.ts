@@ -2,8 +2,26 @@ import { z } from "zod";
 import { BadRequestError } from "../errors";
 
 const userSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(8),
+  email: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Email is required."
+          : "Enter a valid email address.",
+    })
+    .trim()
+    .toLowerCase()
+    .min(1, "Email is required.")
+    .email("Enter a valid email address."),
+  password: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Password is required."
+          : "Password must be at least 8 characters.",
+    })
+    .min(1, "Password is required.")
+    .min(8, "Password must be at least 8 characters."),
 });
 
 export class UserEntity {

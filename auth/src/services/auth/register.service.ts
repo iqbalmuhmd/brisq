@@ -9,7 +9,7 @@ export function buildRegisterService(userRepository: UserRepository) {
     const userEntity = new UserEntity(email, password);
 
     const existingUser = await userRepository.findByEmail(userEntity.email);
-    if (existingUser) throw new ConflictError("Email already exist");
+    if (existingUser) throw new ConflictError("An account with this email already exists.");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const persistedUser = userEntity.toPersisted(hashedPassword);

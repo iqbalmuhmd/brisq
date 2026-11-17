@@ -41,6 +41,7 @@ describe("POST /auth/register", () => {
       .send({ email: "test@example.com", password: "password123" });
 
     expect(res.status).toBe(409);
+    expect(res.body.message).toBe("An account with this email already exists.");
   });
 
   it("returns 400 if email is missing", async () => {
@@ -49,6 +50,16 @@ describe("POST /auth/register", () => {
       .send({ password: "password123" });
 
     expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Email is required.");
+  });
+
+  it("returns 400 if email is invalid", async () => {
+    const res = await request(app)
+      .post("/auth/register")
+      .send({ email: "not-an-email", password: "password123" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Enter a valid email address.");
   });
 
   it("returns 400 if password is missing", async () => {
@@ -57,6 +68,16 @@ describe("POST /auth/register", () => {
       .send({ email: "test@example.com" });
 
     expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Password is required.");
+  });
+
+  it("returns 400 if password is shorter than 8 characters", async () => {
+    const res = await request(app)
+      .post("/auth/register")
+      .send({ email: "test@example.com", password: "short" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Password must be at least 8 characters.");
   });
 });
 
