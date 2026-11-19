@@ -5,6 +5,7 @@ import {
   userContextMiddleware,
 } from "@brisq/common";
 import { verifyController } from "../controllers/auth/verify.controller";
+import { logoutController } from "../controllers/auth/logout.controller";
 
 export function buildAuthRouter(deps: {
   registerController: RequestHandler;
@@ -19,6 +20,7 @@ export function buildAuthRouter(deps: {
 
   router.post("/register", deps.registerController);
   router.post("/login", deps.loginController);
+  router.post("/logout", logoutController);
   router.get("/verify", authMiddleware, verifyController);
   router.get(
     "/linkedin",

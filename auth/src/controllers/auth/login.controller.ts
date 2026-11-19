@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import { buildLoginService } from "../../services/auth/login.service";
 import { ApiResponse } from "@brisq/common";
 import { Logger } from "@brisq/common";
+import {
+  TOKEN_COOKIE_MAX_AGE,
+  TOKEN_COOKIE_NAME,
+  tokenCookieOptions,
+} from "../../config/cookie";
 
 type LoginService = ReturnType<typeof buildLoginService>;
 
@@ -13,11 +18,9 @@ export function buildLoginController(
     const { email, password } = req.body;
     const user = await loginService(email, password);
 
-    res.cookie("token", user.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+    res.cookie(TOKEN_COOKIE_NAME, user.token, {
+      ...tokenCookieOptions,
+      maxAge: TOKEN_COOKIE_MAX_AGE,
     });
 
     logger.info("User logged in", { userId: user.userId, email: user.email });

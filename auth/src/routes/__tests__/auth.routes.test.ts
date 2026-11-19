@@ -114,6 +114,30 @@ describe("POST /auth/login", () => {
   });
 });
 
+describe("POST /auth/logout", () => {
+  it("returns 200 and expires the token cookie", async () => {
+    const res = await request(app).post("/auth/logout");
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe("Logged out");
+
+    const cookies = res.get("Set-Cookie") ?? [];
+    const tokenCookie = cookies.find((c) => c.startsWith("token="));
+
+    expect(tokenCookie).toBeDefined();
+    expect(tokenCookie).toMatch(/^token=;/);
+    expect(tokenCookie).toContain("Expires=Thu, 01 Jan 1970");
+  });
+
+  it("works even with an invalid token cookie", async () => {
+    const res = await request(app)
+      .post("/auth/logout")
+      .set("Cookie", "token=garbage");
+
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("GET /auth/verify", () => {
   it("returns 401 with no cookie", async () => {
     const res = await request(app).get("/auth/verify");
