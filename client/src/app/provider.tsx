@@ -10,15 +10,20 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { ApiRequestError } from "@/lib/api";
 import { queryConfig } from "@/lib/react-query";
+import { paths } from "@/config/paths";
 
 function handleAuthError(error: Error) {
   if (!(error instanceof ApiRequestError) || error.status !== 401) return;
 
   const { pathname, search } = window.location;
-  if (pathname === "/login" || pathname === "/register") return;
+  if (
+    pathname === paths.auth.login.getHref() ||
+    pathname === paths.auth.register.getHref()
+  ) {
+    return;
+  }
 
-  const next = encodeURIComponent(pathname + search);
-  window.location.assign(`/login?next=${next}`);
+  window.location.assign(paths.auth.login.getHref(pathname + search));
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
