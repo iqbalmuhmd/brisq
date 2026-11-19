@@ -5,6 +5,7 @@ import { buildAuthRouter } from "./routes/auth.routes";
 import {
   registerController,
   loginController,
+  meController,
   linkedInController,
   linkedInCallbackController,
   tokenController,
@@ -23,6 +24,7 @@ app.use(cookieParser());
 const authRouter = buildAuthRouter({
   registerController,
   loginController,
+  meController,
   linkedInController,
   linkedInCallbackController,
   tokenController,

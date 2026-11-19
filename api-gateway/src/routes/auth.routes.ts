@@ -7,6 +7,7 @@ const router = Router();
 router.post("/register", forwardToAuth);
 router.post("/login", forwardToAuth);
 router.post("/logout", forwardToAuth);
+router.get("/me", authMiddleware, forwardToAuth);
 router.get("/linkedin", authMiddleware, forwardToAuth);
 router.get("/linkedin/callback", authMiddleware, forwardToAuth);
 router.get("/linkedin/status/:platform", authMiddleware, forwardToAuth);
