@@ -23,6 +23,6 @@ export function buildLoginService(
 
     const token = tokenService.sign(user.id, user.email);
 
-    return { token, userId: user.id, email: user.email };
+    return { token, userId: user.id, email: user.email, name: user.name };
   };
 }

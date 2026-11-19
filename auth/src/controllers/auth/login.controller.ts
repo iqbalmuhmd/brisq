@@ -29,6 +29,7 @@ export function buildLoginController(
       new ApiResponse(true, "Login successful", {
         userId: user.userId,
         email: user.email,
+        name: user.name,
       }),
     );
   };

@@ -9,17 +9,31 @@ beforeEach(() => {
 });
 
 describe("registerService", () => {
-  it("creates a user and returns id and email", async () => {
+  it("creates a user and returns id, email and name", async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
     mockUserRepository.createUser.mockResolvedValue({
       id: "user-123",
       email: "test@example.com",
+      name: "Test User",
     });
 
-    const result = await registerService("test@example.com", "password123");
+    const result = await registerService({
+      name: "Test User",
+      email: "test@example.com",
+      password: "password123",
+    });
 
-    expect(result).toEqual({ userId: "user-123", email: "test@example.com" });
+    expect(result).toEqual({
+      userId: "user-123",
+      email: "test@example.com",
+      name: "Test User",
+    });
     expect(mockUserRepository.createUser).toHaveBeenCalledTimes(1);
+    expect(mockUserRepository.createUser).toHaveBeenCalledWith({
+      name: "Test User",
+      email: "test@example.com",
+      passwordHash: expect.any(String),
+    });
   });
 
   it("throws ConflictError if email already exists", async () => {
@@ -29,7 +43,11 @@ describe("registerService", () => {
     });
 
     await expect(
-      registerService("test@example.com", "password123"),
+      registerService({
+        name: "Test User",
+        email: "test@example.com",
+        password: "password123",
+      }),
     ).rejects.toThrow(ConflictError);
   });
 });

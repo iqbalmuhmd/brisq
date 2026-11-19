@@ -10,8 +10,8 @@ export function buildRegisterController(
   logger: Logger,
 ) {
   return async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    const user = await registerService(email, password);
+    const { name, email, password } = req.body;
+    const user = await registerService({ name, email, password });
     logger.info('User registered', { userId: user.userId, email: user.email });
     res.status(201).json(new ApiResponse(true, "User registered", user));
   };

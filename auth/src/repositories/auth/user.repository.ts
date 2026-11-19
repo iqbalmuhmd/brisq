@@ -1,5 +1,11 @@
 import { PrismaClient } from "../../../generated/prisma/client";
 
+export type CreateUserInput = {
+  name: string;
+  email: string;
+  passwordHash: string;
+};
+
 export function buildUserRepository(prisma: PrismaClient) {
   return {
     findByEmail: async (email: string) => {
@@ -8,8 +14,8 @@ export function buildUserRepository(prisma: PrismaClient) {
     findById: async (id: string) => {
       return prisma.user.findUnique({ where: { id } });
     },
-    createUser: async (email: string, passwordHash: string) => {
-      return prisma.user.create({ data: { email, passwordHash } });
+    createUser: async ({ name, email, passwordHash }: CreateUserInput) => {
+      return prisma.user.create({ data: { name, email, passwordHash } });
     },
   };
 }
