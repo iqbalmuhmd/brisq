@@ -16,5 +16,17 @@ export const paths = {
     dashboard: {
       getHref: () => "/dashboard",
     },
+    compose: {
+      getHref: () => "/compose",
+    },
+    history: {
+      getHref: () => "/history",
+    },
+    notifications: {
+      getHref: () => "/notifications",
+    },
+    account: {
+      getHref: () => "/account",
+    },
   },
 } as const;

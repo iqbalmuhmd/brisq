@@ -14,6 +14,7 @@ import { useRegister, type RegisterInput } from "@/features/auth/api/register";
 type RegisterFormValues = RegisterInput & { confirmPassword: string };
 
 function validate(values: RegisterFormValues): string | null {
+  if (values.name === "") return "Enter your name.";
   if (!/^\S+@\S+\.\S+$/.test(values.email))
     return "Enter a valid email address.";
   if (values.password.length < 8)
@@ -34,6 +35,7 @@ export function RegisterForm({ next }: { next: string }) {
 
     const formData = new FormData(event.currentTarget);
     const values: RegisterFormValues = {
+      name: String(formData.get("name") ?? "").trim(),
       email: String(formData.get("email") ?? "").trim(),
       password: String(formData.get("password") ?? ""),
       confirmPassword: String(formData.get("confirmPassword") ?? ""),
@@ -44,7 +46,7 @@ export function RegisterForm({ next }: { next: string }) {
     if (error) return;
 
     registerMutation.mutate(
-      { email: values.email, password: values.password },
+      { name: values.name, email: values.email, password: values.password },
       {
         onSuccess: () => {
           router.push(next);
@@ -68,6 +70,22 @@ export function RegisterForm({ next }: { next: string }) {
       </h1>
 
       <form noValidate onSubmit={handleSubmit}>
+        <Label
+          htmlFor="name"
+          className="mb-1.5 text-[12.5px] leading-[normal] text-foreground"
+        >
+          Name
+        </Label>
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          placeholder="Alex Morgan"
+          maxLength={50}
+          className="mb-4"
+        />
+        
         <Label
           htmlFor="email"
           className="mb-1.5 text-[12.5px] leading-[normal] text-foreground"
