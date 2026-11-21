@@ -1,7 +1,7 @@
-import amqp, { ChannelModel, Channel } from "amqplib";
+import amqp, { ChannelModel, ConfirmChannel } from "amqplib";
 
 let connection: ChannelModel | null = null;
-let channel: Channel | null = null;
+let channel: ConfirmChannel | null = null;
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 3000;
@@ -13,7 +13,7 @@ export async function connectRabbitMQ(): Promise<void> {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       connection = await amqp.connect(url);
-      channel = await connection.createChannel();
+      channel = await connection.createConfirmChannel();
 
       connection.on("error", (err) =>
         console.error("RabbitMQ error:", err.message),
@@ -25,6 +25,7 @@ export async function connectRabbitMQ(): Promise<void> {
       await channel.assertExchange("publish_jobs_dlx", "direct", {
         durable: true,
       });
+
       await channel.assertQueue("publish_jobs_dead", { durable: true });
       await channel.bindQueue(
         "publish_jobs_dead",
@@ -35,6 +36,10 @@ export async function connectRabbitMQ(): Promise<void> {
       await channel.assertQueue("publish_jobs", {
         durable: true,
         arguments: { "x-dead-letter-exchange": "publish_jobs_dlx" },
+      });
+
+      await channel.assertQueue("post_status_updates", {
+        durable: true,
       });
 
       console.log("RabbitMQ connected");
@@ -49,7 +54,7 @@ export async function connectRabbitMQ(): Promise<void> {
   }
 }
 
-export function getChannel(): Channel {
+export function getChannel(): ConfirmChannel {
   if (!channel)
     throw new Error("Channel not initialized — call connectRabbitMQ() first");
   return channel;
@@ -58,4 +63,24 @@ export function getChannel(): Channel {
 export async function closeRabbitMQ(): Promise<void> {
   await channel?.close();
   await connection?.close();
+}
+
+export function publishWithConfirm(
+  queue: string,
+  payload: unknown,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getChannel().sendToQueue(
+      queue,
+      Buffer.from(JSON.stringify(payload)),
+      { persistent: true },
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      },
+    );
+  });
 }

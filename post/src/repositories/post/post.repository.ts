@@ -28,10 +28,32 @@ export function buildPostRepository(prisma: PrismaClient) {
       platform: Platform,
       status: PostStatus,
       errorMessage: string | null,
+      errorCode: string | null,
     ) => {
-      return prisma.postPlatformStatus.update({
-        where: { postId_platform: { postId, platform } },
-        data: { status, errorMessage },
+      return prisma.postPlatformStatus.updateMany({
+        where: { postId, platform, status: { not: "SUCCEEDED" } },
+        data: { status, errorMessage, errorCode },
+      });
+    },
+
+    retryPlatformStatus: async (
+      postId: string,
+      platform: Platform,
+      userId: string,
+    ) => {
+      return prisma.postPlatformStatus.updateMany({
+        where: {
+          postId,
+          platform,
+          status: "FAILED",
+          errorCode: "ACCESS_TOKEN_DEAD",
+          post: { userId },
+        },
+        data: {
+          status: "PENDING",
+          errorCode: null,
+          errorMessage: null,
+        },
       });
     },
 

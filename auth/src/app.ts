@@ -9,6 +9,7 @@ import {
   linkedInCallbackController,
   tokenController,
   linkedinStatusController,
+  invalidateTokenController,
 } from "./config/container";
 import { buildMorganMiddleware } from "@brisq/common";
 import { logger } from "./config/container";
@@ -26,6 +27,7 @@ const authRouter = buildAuthRouter({
   linkedInCallbackController,
   tokenController,
   linkedinStatusController,
+  invalidateTokenController,
 });
 app.use("/auth", authRouter);
 

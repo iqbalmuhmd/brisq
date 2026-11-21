@@ -9,6 +9,12 @@ type LinkedInConfig = {
 };
 type TokenRepository = ReturnType<typeof buildTokenRepository>;
 
+function isTokenLive<T extends { expiresAt: Date }>(
+  token: T | null,
+): token is T {
+  return token !== null && token.expiresAt > new Date();
+}
+
 export function buildLinkedInService(
   linkedinConfig: LinkedInConfig,
   tokenRepository: TokenRepository,
@@ -86,10 +92,8 @@ export function buildLinkedInService(
     async getValidToken(userId: string, platform: Platform) {
       const token = await tokenRepository.getToken(userId, platform);
 
-      if (!token) throw new NotFoundError("No token provided");
-
-      if (new Date() >= token.expiresAt)
-        throw new InternalServerError("Token expired");
+      if (!isTokenLive(token))
+        throw new NotFoundError("LinkedIn token missing or expired");
 
       return {
         accessToken: token.accessToken,
@@ -99,9 +103,16 @@ export function buildLinkedInService(
     async getTokenStatus(userId: string, platform: Platform) {
       const token = await tokenRepository.getToken(userId, platform);
 
-      if (!token) return { connected: false };
+      if (!isTokenLive(token)) return { connected: false };
 
       return { connected: true, expiresAt: token.expiresAt };
+    },
+    async invalidateToken(
+      userId: string,
+      platform: Platform,
+      accessToken: string,
+    ) {
+      await tokenRepository.invalidateToken(userId, platform, accessToken);
     },
   };
 }

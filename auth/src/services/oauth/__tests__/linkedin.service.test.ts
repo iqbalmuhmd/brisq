@@ -45,7 +45,7 @@ describe("getValidToken", () => {
     ).rejects.toThrow(NotFoundError);
   });
 
-  it("throws InternalServerError when the token is expired", async () => {
+  it("throws NotFoundError when the token is expired", async () => {
     mockTokenRepository.getToken.mockResolvedValue({
       accessToken: "old-token",
       expiresAt: new Date(Date.now() - 60 * 60 * 1000),
@@ -53,12 +53,13 @@ describe("getValidToken", () => {
 
     await expect(
       linkedinService.getValidToken("user-123", Platform.LINKEDIN),
-    ).rejects.toThrow(InternalServerError);
+    ).rejects.toThrow(NotFoundError);
   });
 
-  it("returns the access token when the token is valid", async () => {
+  it("returns the access token and person urn when the token is valid", async () => {
     mockTokenRepository.getToken.mockResolvedValue({
       accessToken: "valid-token",
+      linkedInPersonUrn: "urn-123",
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     });
 
@@ -67,13 +68,19 @@ describe("getValidToken", () => {
       Platform.LINKEDIN,
     );
 
-    expect(result).toBe("valid-token");
+    expect(result).toEqual({
+      accessToken: "valid-token",
+      personUrn: "urn-123",
+    });
   });
 });
 
 describe("getTokenStatus", () => {
-  it("returns connected false when there is no token", async () => {
-    mockTokenRepository.getToken.mockResolvedValue(null);
+  it("returns connected false when the token is expired", async () => {
+    mockTokenRepository.getToken.mockResolvedValue({
+      accessToken: "old-token",
+      expiresAt: new Date(Date.now() - 60 * 60 * 1000),
+    });
 
     const result = await linkedinService.getTokenStatus(
       "user-123",
@@ -99,24 +106,47 @@ describe("getTokenStatus", () => {
   });
 });
 
+describe("invalidateToken", () => {
+  it("passes user, platform and token to the repository", async () => {
+    await linkedinService.invalidateToken(
+      "user-123",
+      Platform.LINKEDIN,
+      "dead-token",
+    );
+
+    expect(mockTokenRepository.invalidateToken).toHaveBeenCalledWith(
+      "user-123",
+      Platform.LINKEDIN,
+      "dead-token",
+    );
+  });
+});
+
 describe("handleCallback", () => {
   it("exchanges the code and saves the token on success", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        access_token: "the-access-token",
-        refresh_token: "the-refresh-token",
-        expires_in: 3600,
-      }),
-    });
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          access_token: "the-access-token",
+          refresh_token: "the-refresh-token",
+          expires_in: 3600,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ sub: "person-123" }),
+      });
 
     await linkedinService.handleCallback("auth-code", "user-123");
 
+    expect(global.fetch).toHaveBeenCalledTimes(2);
     expect(mockTokenRepository.upsertToken).toHaveBeenCalledWith(
       "user-123",
       Platform.LINKEDIN,
       "the-access-token",
       "the-refresh-token",
+      "person-123",
       expect.any(Date),
     );
   });
