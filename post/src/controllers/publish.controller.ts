@@ -6,10 +6,10 @@ type PublishService = ReturnType<typeof buildPublishService>;
 
 export function buildPublishController(publishService: PublishService) {
   return async (req: Request, res: Response) => {
-    const { content, platforms, imageUrl } = req.body;
+    const { content, platforms, imageKey } = req.body;
     const userId = req.user!.userId;
 
-    const post = await publishService(userId, content, platforms, imageUrl);
+    const post = await publishService(userId, content, platforms, imageKey);
 
     res
       .status(201)

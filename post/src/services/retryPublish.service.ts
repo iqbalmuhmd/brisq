@@ -30,7 +30,7 @@ export function buildRetryPublishService(
       userId,
       platform: parsedPlatform,
       content: post!.content,
-      imageUrl: post!.imageUrl ?? undefined,
+      imageKey: post!.imageKey ?? undefined,
     });
   };
 }
