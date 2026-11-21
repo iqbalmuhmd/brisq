@@ -4,7 +4,7 @@ import { PostEntity } from "../entities/PostEntity";
 import { buildPostRepository } from "../repositories/post/post.repository";
 
 type PostRepository = ReturnType<typeof buildPostRepository>;
-type PublishJob = (payload: IJobPayload) => void;
+type PublishJob = (payload: IJobPayload) => Promise<void>;
 
 export function buildPublishService(
   postRepository: PostRepository,
@@ -26,7 +26,7 @@ export function buildPublishService(
     );
 
     for (const platform of postEntity.platforms) {
-      publishJob({
+      await publishJob({
         jobId: randomUUID(),
         postId: post.id,
         userId,

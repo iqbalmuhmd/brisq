@@ -1,9 +1,5 @@
-import { getChannel, IJobPayload } from "@brisq/common";
+import { publishWithConfirm, IJobPayload } from "@brisq/common";
 
-export function jobPublisher(payload: IJobPayload): void {
-  getChannel().sendToQueue(
-    "publish_jobs",
-    Buffer.from(JSON.stringify(payload)),
-    { persistent: true },
-  );
+export function publishJob(payload: IJobPayload): Promise<void> {
+  return publishWithConfirm("publish_jobs", payload);
 }

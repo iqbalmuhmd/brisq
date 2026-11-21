@@ -1,11 +1,11 @@
 import "./config/env";
 import { connectRabbitMQ, closeRabbitMQ, getChannel } from "@brisq/common";
-import { startConsuming, getConsumerTag, getInFlight } from "./consumer";
+import { jobConsumer } from "./config/container";
 
 async function main() {
   try {
     await connectRabbitMQ();
-    await startConsuming();
+    await jobConsumer.start();
     console.log("Worker service running");
   } catch (error) {
     console.error("Failed to start worker:", error);
@@ -13,17 +13,22 @@ async function main() {
   }
 }
 
-async function shutdown() {
+let shuttingDown = false;
+
+async function shutdown(signal: string) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
   try {
     const channel = getChannel();
-    const tag = getConsumerTag();
+    const tag = jobConsumer.getConsumerTag();
     if (tag) await channel.cancel(tag);
 
-    const inFlight = getInFlight();
+    const inFlight = jobConsumer.getInFlight();
     if (inFlight) await inFlight;
 
     await closeRabbitMQ();
-    console.log("Worker shut down cleanly");
+    console.log("Worker shut down cleanly", { signal });
   } catch (error) {
     console.error("Error during shutdown:", error);
   } finally {
@@ -31,7 +36,7 @@ async function shutdown() {
   }
 }
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGINT", () => void shutdown("SIGINT"));
+process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
 main();

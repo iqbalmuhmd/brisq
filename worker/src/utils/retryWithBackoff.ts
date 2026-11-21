@@ -1,6 +1,6 @@
 import { JobError } from "../errors";
 
-const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const RETRYABLE_STATUSES = new Set([429, 503]);
 const MAX_WAIT_MS = 8000;
 
 const sleep = (ms: number) =>

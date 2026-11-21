@@ -1,9 +1,10 @@
+import { Platform } from "@brisq/common";
 import { config } from "../config/env";
 import { JobError } from "../errors/JobError";
 
 export function buildAuthClient() {
   return {
-    async getToken(userId: string, platform: string) {
+    async getToken(userId: string, platform: Platform) {
       const response = await fetch(
         `${config.auth.url}/auth/token/${platform}`,
         {

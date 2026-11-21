@@ -23,6 +23,12 @@ export function buildPostRepository(prisma: PrismaClient) {
       });
     },
 
+    getPlatformStatus: async (postId: string, platform: Platform) => {
+      return prisma.postPlatformStatus.findUnique({
+        where: { postId_platform: { postId, platform } },
+      });
+    },
+
     updatePlatformStatus: async (
       postId: string,
       platform: Platform,
@@ -31,7 +37,7 @@ export function buildPostRepository(prisma: PrismaClient) {
       errorCode: string | null,
     ) => {
       return prisma.postPlatformStatus.updateMany({
-        where: { postId, platform, status: { not: "SUCCEEDED" } },
+        where: { postId, platform, status: { not: "PENDING" } },
         data: { status, errorMessage, errorCode },
       });
     },
@@ -69,6 +75,13 @@ export function buildPostRepository(prisma: PrismaClient) {
       return prisma.post.findFirst({
         where: { id: postId, userId },
         include: { platformStatuses: true },
+      });
+    },
+
+    findPostOwner: async (postId: string) => {
+      return prisma.post.findUnique({
+        where: { id: postId },
+        select: { userId: true },
       });
     },
   };
