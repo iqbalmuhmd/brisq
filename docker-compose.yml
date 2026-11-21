@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: brisq-postgres-auth
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       POSTGRES_USER: ${AUTH_POSTGRES_USER}
       POSTGRES_PASSWORD: ${AUTH_POSTGRES_PASSWORD}
@@ -102,6 +102,33 @@ services:
             - node_modules/
         - action: rebuild
           path: ./post/package.json
+        - action: rebuild
+          path: ./common/src
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    container_name: brisq-worker
+    stop_grace_period: 30s
+    env_file:
+      - path: ./worker/.env.development
+        required: true
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      - NODE_ENV=development
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./worker/src
+          target: /app/worker/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./worker/package.json
         - action: rebuild
           path: ./common/src
 
