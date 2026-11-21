@@ -288,7 +288,7 @@ describe("GET /auth/linkedin/callback", () => {
 });
 
 describe("GET /auth/linkedin/status/:platform", () => {
-  it("returns connected false when there is no token", async () => {
+  it("returns not_connected when there is no token", async () => {
     const userId = await registerAndGetUserId();
 
     const res = await request(app)
@@ -297,10 +297,30 @@ describe("GET /auth/linkedin/status/:platform", () => {
       .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({ connected: false });
+    expect(res.body.data).toEqual({ status: "not_connected" });
   });
 
-  it("returns connected true with expiresAt when a token exists", async () => {
+  it("returns expired when the token has expired", async () => {
+    const userId = await registerAndGetUserId();
+    await prisma.platformToken.create({
+      data: {
+        userId,
+        platform: "LINKEDIN",
+        accessToken: "expired-access-token",
+        expiresAt: new Date(Date.now() - 60 * 60 * 1000),
+      },
+    });
+
+    const res = await request(app)
+      .get("/auth/linkedin/status/LINKEDIN")
+      .set("x-internal-secret", process.env.INTER_SERVICE_SECRET!)
+      .set("x-user-id", userId);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({ status: "expired" });
+  });
+
+  it("returns connected with expiresAt when a token exists", async () => {
     const userId = await registerAndGetUserId();
     await prisma.platformToken.create({
       data: {
@@ -317,7 +337,7 @@ describe("GET /auth/linkedin/status/:platform", () => {
       .set("x-user-id", userId);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.connected).toBe(true);
+    expect(res.body.data.status).toBe("connected");
     expect(res.body.data).toHaveProperty("expiresAt");
   });
 

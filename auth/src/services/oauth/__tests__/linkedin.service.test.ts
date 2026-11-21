@@ -76,7 +76,18 @@ describe("getValidToken", () => {
 });
 
 describe("getTokenStatus", () => {
-  it("returns connected false when the token is expired", async () => {
+  it("returns not_connected when there is no token", async () => {
+    mockTokenRepository.getToken.mockResolvedValue(null);
+
+    const result = await linkedinService.getTokenStatus(
+      "user-123",
+      Platform.LINKEDIN,
+    );
+
+    expect(result).toEqual({ status: "not_connected" });
+  });
+
+  it("returns expired when the token is expired", async () => {
     mockTokenRepository.getToken.mockResolvedValue({
       accessToken: "old-token",
       expiresAt: new Date(Date.now() - 60 * 60 * 1000),
@@ -87,10 +98,10 @@ describe("getTokenStatus", () => {
       Platform.LINKEDIN,
     );
 
-    expect(result).toEqual({ connected: false });
+    expect(result).toEqual({ status: "expired" });
   });
 
-  it("returns connected true with expiresAt when a token exists", async () => {
+  it("returns connected with expiresAt when a token exists", async () => {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
     mockTokenRepository.getToken.mockResolvedValue({
       accessToken: "valid-token",
@@ -102,7 +113,7 @@ describe("getTokenStatus", () => {
       Platform.LINKEDIN,
     );
 
-    expect(result).toEqual({ connected: true, expiresAt });
+    expect(result).toEqual({ status: "connected", expiresAt });
   });
 });
 

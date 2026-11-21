@@ -1,25 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { env } from "@/config/env";
+import { type DashboardError, paths } from "@/config/paths";
 
-const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://localhost:3000";
+const CANCEL_ERRORS = [
+  "user_cancelled_login",
+  "user_cancelled_authorize",
+  "access_denied",
+];
 
 export async function GET(req: NextRequest) {
-  const dashboard = (params = "") =>
-    NextResponse.redirect(new URL(`/dashboard${params}`, req.url));
+  const dashboard = (error?: DashboardError) =>
+    NextResponse.redirect(new URL(paths.app.dashboard.getHref(error), req.url));
 
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
   const error = req.nextUrl.searchParams.get("error");
 
-  if (error === "access_denied") {
-    return dashboard("?error=connection_cancelled");
+  if (error && CANCEL_ERRORS.includes(error)) {
+    return dashboard("connection_cancelled");
   }
 
   if (error || !code || !state) {
-    return dashboard("?error=oauth_failed");
+    return dashboard("oauth_failed");
   }
+
   try {
     const response = await fetch(
-      `${GATEWAY_URL}/auth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+      `${env.gatewayUrl}/auth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
       {
         headers: { cookie: req.headers.get("cookie") ?? "" },
         redirect: "manual",
@@ -27,7 +34,7 @@ export async function GET(req: NextRequest) {
     );
 
     if (!response.ok) {
-      return dashboard("?error=oauth_failed");
+      return dashboard("oauth_failed");
     }
 
     const body = await response.json();
@@ -35,15 +42,14 @@ export async function GET(req: NextRequest) {
     const redirect =
       body?.data?.status === "connected"
         ? dashboard()
-        : dashboard("?error=oauth_failed");
+        : dashboard("oauth_failed");
 
-    const setCookie = response.headers.get("set-cookie");
-    if (setCookie) {
-      redirect.headers.set("set-cookie", setCookie);
+    for (const cookie of response.headers.getSetCookie()) {
+      redirect.headers.append("set-cookie", cookie);
     }
 
     return redirect;
   } catch {
-    return dashboard("?error=oauth_failed");
+    return dashboard("oauth_failed");
   }
 }

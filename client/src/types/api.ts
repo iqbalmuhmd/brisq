@@ -27,10 +27,10 @@ export type User = {
   name: string;
 };
 
-export type LinkedInStatus = {
-  connected: boolean;
-  expiresAt?: string;
-};
+export type LinkedInStatus =
+  | { status: "connected"; expiresAt: string }
+  | { status: "expired" }
+  | { status: "not_connected" };
 
 export type UploadResult = {
   key: string;

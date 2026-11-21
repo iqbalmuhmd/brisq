@@ -8,6 +8,8 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "next-themes";
 import { ApiRequestError } from "@/lib/api";
 import { queryConfig } from "@/lib/react-query";
 import { paths } from "@/config/paths";
@@ -37,9 +39,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <TooltipProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <Toaster
+            className="toaster group max-md:[--offset-bottom:calc(72px+env(safe-area-inset-bottom))]!"
+            mobileOffset={{ bottom: "calc(72px + env(safe-area-inset-bottom))" }}
+            toastOptions={{ classNames: { toast: "cn-toast shadow-none!" } }}
+          />
+        </QueryClientProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }

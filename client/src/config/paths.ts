@@ -1,3 +1,5 @@
+export type DashboardError = "connection_cancelled" | "oauth_failed";
+
 export const paths = {
   home: {
     getHref: () => "/",
@@ -14,7 +16,8 @@ export const paths = {
   },
   app: {
     dashboard: {
-      getHref: () => "/dashboard",
+      getHref: (error?: DashboardError) =>
+        `/dashboard${error ? `?error=${error}` : ""}`,
     },
     compose: {
       getHref: () => "/compose",
