@@ -1,57 +1,75 @@
-import { cookies } from "next/headers";
+import { LinkedInCard } from "@/features/linkedin/components/linkedin-card";
+import { ApiRequestError } from "@/lib/api";
+import { serverFetch } from "@/lib/server-api";
+import type { LinkedInStatus, User } from "@/types/api";
+
+const oauthMessages: Record<string, { text: string; isError: boolean }> = {
+  connection_cancelled: {
+    text: "You cancelled the LinkedIn connection.",
+    isError: false,
+  },
+  oauth_failed: {
+    text: "Connecting to LinkedIn failed. Please try again.",
+    isError: true,
+  },
+};
 
 export default async function DashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://localhost:3000";
-
   const { error } = await searchParams;
 
-  async function getLinkedInStatus() {
-    const cookieStore = await cookies();
+  const [user, linkedInStatus] = await Promise.all([
+    serverFetch<User>("/auth/me").catch((err) => {
+      if (err instanceof ApiRequestError) return null;
+      throw err;
+    }),
+    serverFetch<LinkedInStatus>("/auth/linkedin/status/linkedin").catch(
+      (err) => {
+        if (err instanceof ApiRequestError) return null;
+        throw err;
+      },
+    ),
+  ]);
 
-    const res = await fetch(`${GATEWAY_URL}/auth/linkedin/status/linkedin`, {
-      headers: { cookie: cookieStore.toString() },
-      cache: "no-store",
-    });
-
-    if (!res.ok) return { connected: false };
-
-    const body = await res.json();
-    return body?.data ?? { connected: false };
-  }
-
-  const status = await getLinkedInStatus();
-
-  const errorMessages: Record<string, string> = {
-    connection_cancelled: "You cancelled the LinkedIn connection.",
-    oauth_failed: "Connecting to LinkedIn failed. Please try again.",
-  };
-
-  const errorMessage = error ? errorMessages[error] : undefined;
+  const firstName = user?.name.split(" ")[0];
+  const oauthMessage = error ? oauthMessages[error] : undefined;
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
+    <>
+      <header className="mb-11">
+        <p className="font-mono text-[11px] tracking-[0.08em] text-muted-foreground uppercase">
+          Dashboard
+        </p>
+        <h1 className="text-[34px] font-medium md:text-5xl">
+          Welcome back
+          {firstName ? (
+            <>
+              , <span className="text-brand">{firstName}.</span>
+            </>
+          ) : (
+            "."
+          )}
+        </h1>
+      </header>
 
-      {errorMessage && (
-        <div className="mt-4 rounded border border-red-300 bg-red-50 p-3 text-red-800">
-          {errorMessage}
-        </div>
-      )}
-
-      {status.connected ? (
-        <p className="mt-4">LinkedIn: Connected ✓</p>
-      ) : (
-        <a
-          href="/api/auth/linkedin/start"
-          className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-white"
+      {oauthMessage && (
+        <p
+          role={oauthMessage.isError ? "alert" : "status"}
+          className={
+            oauthMessage.isError ? "text-destructive" : "text-muted-foreground"
+          }
         >
-          Connect LinkedIn
-        </a>
+          {oauthMessage.text}
+        </p>
       )}
-    </main>
+
+      <section className="mt-10">
+        <h2 className="text-[13px] font-medium">Channels</h2>
+        <LinkedInCard status={linkedInStatus} />
+      </section>
+    </>
   );
 }
