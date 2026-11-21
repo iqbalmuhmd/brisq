@@ -16,6 +16,7 @@ describe("loginService", () => {
     mockUserRepository.findByEmail.mockResolvedValue({
       id: "user-123",
       email: "test@example.com",
+      name: "Test User",
       passwordHash: "hashed-password",
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -27,6 +28,7 @@ describe("loginService", () => {
       token: "fake-jwt-token",
       userId: "user-123",
       email: "test@example.com",
+      name: "Test User",
     });
   });
 

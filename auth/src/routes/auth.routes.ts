@@ -1,14 +1,11 @@
 import { Router, RequestHandler } from "express";
-import {
-  authMiddleware,
-  interServiceMiddleware,
-  userContextMiddleware,
-} from "@brisq/common";
-import { verifyController } from "../controllers/auth/verify.controller";
+import { interServiceMiddleware, userContextMiddleware } from "@brisq/common";
+import { logoutController } from "../controllers/auth/logout.controller";
 
 export function buildAuthRouter(deps: {
   registerController: RequestHandler;
   loginController: RequestHandler;
+  meController: RequestHandler;
   linkedInController: RequestHandler;
   linkedInCallbackController: RequestHandler;
   tokenController: RequestHandler;
@@ -19,7 +16,13 @@ export function buildAuthRouter(deps: {
 
   router.post("/register", deps.registerController);
   router.post("/login", deps.loginController);
-  router.get("/verify", authMiddleware, verifyController);
+  router.post("/logout", logoutController);
+  router.get(
+    "/me",
+    interServiceMiddleware,
+    userContextMiddleware,
+    deps.meController,
+  );
   router.get(
     "/linkedin",
     interServiceMiddleware,
