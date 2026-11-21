@@ -12,6 +12,10 @@ loadEnv([
   "AUTH_SERVICE_URL",
   "POST_SERVICE_URL",
   "INTER_SERVICE_SECRET",
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
+  "AWS_S3_BUCKET",
+  "AWS_REGION",
 ]);
 
 export const config = {
@@ -23,6 +27,12 @@ export const config = {
   },
   post: {
     url: process.env.POST_SERVICE_URL!,
+  },
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    bucket: process.env.AWS_S3_BUCKET!,
+    region: process.env.AWS_REGION!,
   },
   interServiceSecret: process.env.INTER_SERVICE_SECRET!,
 } as const;

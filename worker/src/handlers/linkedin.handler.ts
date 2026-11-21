@@ -1,23 +1,27 @@
 import { IJobPayload, IStatusUpdate } from "@brisq/common";
 import { buildAuthClient } from "../clients/auth.client";
 import { buildLinkedInClient } from "../clients/linkedin.client";
-import { retryWithBackoff } from "../utils/retryWithBackoff";
+import { retryWithBackoff, RETRYABLE_STATUSES_UPLOAD } from "../utils/retryWithBackoff";
 import { JobError, StatusSyncError, UnknownOutcomeError } from "../errors";
 import { markTokenDeadAndFail } from "./markTokenDeadAndFail";
+import { buildS3Client } from "../clients/s3.client";
 
 type AuthClient = ReturnType<typeof buildAuthClient>;
 type LinkedInClient = ReturnType<typeof buildLinkedInClient>;
+type ImageStore = ReturnType<typeof buildS3Client>;
 
 type PublishStatusUpdate = (update: IStatusUpdate) => Promise<void>;
 
 export function buildLinkedInHandler(
   authClient: AuthClient,
   linkedInClient: LinkedInClient,
+  imageStore: ImageStore,
   publishStatusUpdate: PublishStatusUpdate,
 ) {
   return async (job: IJobPayload) => {
     let accessToken: string;
     let personUrn: string | null;
+    let imageUrn: string | undefined;
 
     try {
       const result = await authClient.getToken(job.userId, job.platform);
@@ -45,9 +49,44 @@ export function buildLinkedInHandler(
       return;
     }
 
+    if (job.imageKey) {
+      try {
+        const bytes = await imageStore.getObject(job.imageKey);
+
+        const upload = await retryWithBackoff(
+          () => linkedInClient.initializeImageUpload(accessToken, personUrn),
+          3,
+          2000,
+          RETRYABLE_STATUSES_UPLOAD,
+        );
+
+        await retryWithBackoff(
+          () =>
+            linkedInClient.uploadImage(accessToken, upload.uploadUrl, bytes),
+          3,
+          2000,
+          RETRYABLE_STATUSES_UPLOAD,
+        );
+
+        imageUrn = upload.imageUrn;
+      } catch (err) {
+        if (err instanceof JobError && err.status === 401) {
+          await markTokenDeadAndFail(
+            publishStatusUpdate,
+            authClient,
+            job,
+            accessToken,
+          );
+          return;
+        }
+        throw err;
+      }
+    }
+
     try {
       await retryWithBackoff(
-        () => linkedInClient.post(accessToken, personUrn, job.content),
+        () =>
+          linkedInClient.post(accessToken, personUrn, job.content, imageUrn),
         3,
         2000,
       );
