@@ -103,9 +103,10 @@ export function buildLinkedInService(
     async getTokenStatus(userId: string, platform: Platform) {
       const token = await tokenRepository.getToken(userId, platform);
 
-      if (!isTokenLive(token)) return { connected: false };
+      if (!token) return { status: "not_connected" as const };
+      if (!isTokenLive(token)) return { status: "expired" as const };
 
-      return { connected: true, expiresAt: token.expiresAt };
+      return { status: "connected" as const, expiresAt: token.expiresAt };
     },
     async invalidateToken(
       userId: string,
