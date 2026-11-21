@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 export function AppSidebar({ footer }: { footer: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 hidden h-screen w-[232px] flex-col border-r md:flex">
-      <div className="px-6 py-6 text-2xl font-semibold">
+    <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col border-r bg-background md:flex">
+      <div className="px-6 pt-[26px] pb-[30px] text-2xl leading-[normal] font-semibold tracking-[-0.045em] text-foreground">
         Brisq<span className="text-brand">.</span>
       </div>
 
@@ -23,10 +23,10 @@ export function AppSidebar({ footer }: { footer: React.ReactNode }) {
               href={href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex h-9 items-center gap-3 rounded-md px-3 text-sm",
+                "flex h-9 w-full items-center gap-3 rounded-md px-3 text-sm",
                 isActive
                   ? "bg-accent font-medium text-foreground"
-                  : "text-muted-foreground",
+                  : "text-muted-foreground hover:bg-accent",
               )}
             >
               <Icon
@@ -39,7 +39,7 @@ export function AppSidebar({ footer }: { footer: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="p-3">{footer}</div>
+      <div className="border-t px-5 py-4">{footer}</div>
     </aside>
   );
 }

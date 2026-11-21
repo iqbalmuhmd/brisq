@@ -48,7 +48,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       <TooltipProvider>
         <QueryClientProvider client={queryClient}>
           {children}
-          <Toaster />
+          <Toaster
+            className="toaster group max-md:[--offset-bottom:calc(72px+env(safe-area-inset-bottom))]!"
+            mobileOffset={{ bottom: "calc(72px + env(safe-area-inset-bottom))" }}
+            toastOptions={{ classNames: { toast: "cn-toast shadow-none!" } }}
+          />
         </QueryClientProvider>
       </TooltipProvider>
     </ThemeProvider>

@@ -22,6 +22,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Brisq",
   description: "Publish everywhere at once",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
