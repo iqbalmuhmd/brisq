@@ -1,9 +1,10 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { env } from "@/config/env";
 import { paths } from "@/config/paths";
 import { ApiRequestError, type ApiEnvelope } from "@/lib/api";
+import { PATHNAME_HEADER } from "@/config/headers";
 
 export async function serverFetch<T>(path: string): Promise<T> {
   const cookieStore = await cookies();
@@ -19,7 +20,8 @@ export async function serverFetch<T>(path: string): Promise<T> {
   }
 
   if (res.status === 401) {
-    redirect(paths.auth.login.getHref());
+    const currentPage = (await headers()).get(PATHNAME_HEADER) ?? undefined;
+    redirect(paths.auth.expired.getHref(currentPage));
   }
 
   const json = (await res.json().catch(() => null)) as ApiEnvelope<T> | null;

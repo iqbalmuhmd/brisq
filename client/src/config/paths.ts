@@ -9,6 +9,10 @@ export const paths = {
       getHref: (next?: string) =>
         `/login${next ? `?next=${encodeURIComponent(next)}` : ""}`,
     },
+    expired: {
+      getHref: (next?: string) =>
+        `/api/auth/expired${next ? `?next=${encodeURIComponent(next)}` : ""}`,
+    },
     register: {
       getHref: (next?: string) =>
         `/register${next ? `?next=${encodeURIComponent(next)}` : ""}`,
