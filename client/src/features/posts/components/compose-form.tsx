@@ -1,17 +1,22 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { Check, CircleAlert, ImagePlus, Loader2, X } from "lucide-react";
-import { readDraft, saveDraft } from "@/features/posts/utils/draft";
-import { Textarea } from "@/components/ui/textarea";
-import { characterLimits } from "@/config/platforms";
+import { useState } from "react";
 import Link from "next/link";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Check, CircleAlert, ImagePlus, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { paths } from "@/config/paths";
+import { characterLimits } from "@/config/platforms";
+import { useDraft } from "@/features/posts/hooks/use-draft";
+import { useImageUpload } from "@/features/posts/hooks/use-image-upload";
 import { cn } from "@/lib/utils";
 import type { LinkedInStatus, Platform } from "@/types/api";
-import { useUploadImage } from "@/features/posts/api/upload-image";
+
+type ComposeFormProps = {
+  userId: string | null;
+  linkedInStatus: LinkedInStatus | null;
+};
 
 function getLinkedInNote(status: LinkedInStatus | null): string | null {
   if (status === null) return "Couldn't check your LinkedIn connection.";
@@ -20,95 +25,10 @@ function getLinkedInNote(status: LinkedInStatus | null): string | null {
   return null;
 }
 
-type UploadState =
-  | { status: "idle" }
-  | { status: "uploading" }
-  | { status: "uploaded"; key: string }
-  | { status: "error"; message: string };
-
-type ComposeFormProps = {
-  userId: string | null;
-  linkedInStatus: LinkedInStatus | null;
-};
-
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
-
 export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
-  const [content, setContent] = useState("");
-  const [draftChecked, setDraftChecked] = useState(false);
-  const [upload, setUpload] = useState<UploadState>({ status: "idle" });
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const uploadIdRef = useRef(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadMutation = useUploadImage();
-
-  useEffect(() => {
-    if (userId !== null) {
-      const saved = readDraft(userId);
-      if (saved !== null) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage only exists after mount
-        setContent(saved);
-      }
-    }
-    setDraftChecked(true);
-  }, [userId]);
-
-  useEffect(() => {
-    if (!draftChecked || userId === null) return;
-    saveDraft(userId, content);
-  }, [content, draftChecked, userId]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  async function handleImage(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setUpload({
-        status: "error",
-        message: "Only JPEG and PNG images are allowed.",
-      });
-      return;
-    }
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      setUpload({
-        status: "error",
-        message: "Image is too large. Max 5 MB.",
-      });
-      return;
-    }
-
-    setPreviewUrl(URL.createObjectURL(file));
-    uploadIdRef.current += 1;
-    const uploadId = uploadIdRef.current;
-    setUpload({ status: "uploading" });
-
-    try {
-      const { key } = await uploadMutation.mutateAsync(file);
-      if (uploadId !== uploadIdRef.current) return;
-      setUpload({ status: "uploaded", key });
-    } catch (err) {
-      if (uploadId !== uploadIdRef.current) return;
-      setUpload({
-        status: "error",
-        message: err instanceof Error ? err.message : "Upload failed.",
-      });
-    }
-  }
-
-  function handleRemove() {
-    uploadIdRef.current += 1;
-    setUpload({ status: "idle" });
-    setPreviewUrl(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
+  const { content, setContent, draftChecked } = useDraft(userId);
+  const { upload, previewUrl, fileInputRef, handleImage, handleRemove } =
+    useImageUpload();
 
   const limit = characterLimits.LINKEDIN;
   const count = content.length;
