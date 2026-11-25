@@ -1,6 +1,7 @@
 import { Platform, parsePlatform, BadRequestError } from "@brisq/common";
 import { Platform as PrismaPlatform } from "../../generated/prisma/client";
 
+const MAX_CONTENT_LENGTH = 3000;
 const IMAGE_KEY_PATTERN =
   /^uploads\/[^/]+\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png)$/i;
 
@@ -17,6 +18,12 @@ export class PostEntity {
   ) {
     if (typeof content !== "string" || content.trim().length === 0) {
       throw new BadRequestError("Content cannot be empty");
+    }
+
+    if (content.length > MAX_CONTENT_LENGTH) {
+      throw new BadRequestError(
+        `Content must be ${MAX_CONTENT_LENGTH} characters or fewer`,
+      );
     }
 
     if (!Array.isArray(platforms) || platforms.length === 0) {
