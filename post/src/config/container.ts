@@ -14,14 +14,20 @@ import { buildRetryPublishController } from "../controllers/retryPublish.control
 import { buildStatusConsumer } from "../messaging/statusConsumer";
 import { buildGetPlatformStatusService } from "../services/getPlatformStatus.service";
 import { buildGetPlatformStatusController } from "../controllers/getPlatformStatus.controller";
+import { buildImageSigner } from "../storage/imageSigner";
+import { s3Client } from "./s3";
+import { config } from "./env";
 
 const postRepository = buildPostRepository(prisma);
+const imageSigner = buildImageSigner(s3Client, config.aws.bucket);
 
 const publishService = buildPublishService(postRepository, publishJob);
-const recordPublishResultService =
-  buildRecordPublishResultService(postRepository, publishJobResult);
-const getPostsService = buildGetPostsService(postRepository);
-const getPostService = buildGetPostService(postRepository);
+const recordPublishResultService = buildRecordPublishResultService(
+  postRepository,
+  publishJobResult,
+);
+const getPostsService = buildGetPostsService(postRepository, imageSigner);
+const getPostService = buildGetPostService(postRepository, imageSigner);
 const retryPublishService = buildRetryPublishService(
   postRepository,
   publishJob,
