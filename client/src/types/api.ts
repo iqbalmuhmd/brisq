@@ -35,3 +35,9 @@ export type LinkedInStatus =
 export type UploadResult = {
   key: string;
 };
+
+export type PublishPostInput = {
+  content: string;
+  platforms: Platform[];
+  imageKey?: string;
+};

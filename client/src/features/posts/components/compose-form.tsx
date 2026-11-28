@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, CircleAlert, ImagePlus, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { paths } from "@/config/paths";
 import { characterLimits } from "@/config/platforms";
+import { paths } from "@/config/paths";
 import { useDraft } from "@/features/posts/hooks/use-draft";
 import { useImageUpload } from "@/features/posts/hooks/use-image-upload";
+import { usePublishPost } from "@/features/posts/api/publish-post";
+import { clearDraft } from "@/features/posts/utils/draft";
 import { cn } from "@/lib/utils";
 import type { LinkedInStatus, Platform } from "@/types/api";
 
@@ -30,6 +34,10 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
   const { upload, previewUrl, fileInputRef, handleImage, handleRemove } =
     useImageUpload();
 
+  const router = useRouter();
+  const publishMutation = usePublishPost();
+  const isPublishing = publishMutation.isPending;
+
   const limit = characterLimits.LINKEDIN;
   const count = content.length;
   const isOverLimit = count > limit;
@@ -46,7 +54,24 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
     platforms.length > 0 &&
     !isOverLimit &&
     upload.status !== "uploading" &&
-    upload.status !== "error";
+    upload.status !== "error" &&
+    !isPublishing;
+
+  function handlePublish() {
+    if (!canPublish) return;
+
+    const imageKey = upload.status === "uploaded" ? upload.key : undefined;
+    publishMutation.mutate(
+      { content, platforms, imageKey },
+      {
+        onSuccess: () => {
+          clearDraft();
+          toast.success("Your post is being published.");
+          router.push(paths.app.history.getHref());
+        },
+      },
+    );
+  }
 
   return (
     <div className="border-t-2 border-rule-strong">
@@ -62,7 +87,7 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
         >
           <ToggleGroupItem
             value={"LINKEDIN" satisfies Platform}
-            disabled={!isLinkedInConnected}
+            disabled={!isLinkedInConnected || isPublishing}
             className="h-8 gap-2 rounded-full border border-border bg-card pr-3 pl-[9px] text-[13px] font-medium text-foreground hover:bg-card hover:text-foreground disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-card data-[state=on]:border-foreground data-[state=on]:bg-card"
           >
             <span className="flex size-[15px] items-center justify-center rounded-full border border-faint group-data-[state=on]/toggle:border-foreground group-data-[state=on]/toggle:bg-foreground">
@@ -87,7 +112,7 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
         <Textarea
           value={content}
           onChange={(event) => setContent(event.target.value)}
-          disabled={!draftChecked}
+          disabled={!draftChecked || isPublishing}
           aria-label="Post text"
           placeholder="What do you want to share?"
           className="min-h-[180px] resize-none rounded-none border-0 bg-transparent p-0 text-xl leading-normal tracking-[-0.01em] text-foreground shadow-none placeholder:text-faint focus-visible:ring-0 disabled:cursor-text disabled:bg-transparent disabled:opacity-100 md:text-xl dark:bg-transparent dark:disabled:bg-transparent"
@@ -112,8 +137,9 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
                 <button
                   type="button"
                   onClick={handleRemove}
+                  disabled={isPublishing}
                   aria-label="Remove image"
-                  className="absolute top-[5px] right-[5px] z-10 flex size-5 items-center justify-center rounded-full bg-black/60"
+                  className="absolute top-[5px] right-[5px] z-10 flex size-5 items-center justify-center rounded-full bg-black/60 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <X size={9} strokeWidth={1.9} className="text-white" />
                 </button>
@@ -142,6 +168,16 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
         )}
       </div>
 
+      {publishMutation.error && (
+        <p
+          role="alert"
+          className="flex items-center gap-[7px] pb-3 text-[13px] text-destructive"
+        >
+          <CircleAlert size={15} strokeWidth={1.8} className="shrink-0" />
+          {publishMutation.error.message}
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 border-t py-4 md:justify-between">
         <input
           ref={fileInputRef}
@@ -154,7 +190,7 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
           type="button"
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
-          disabled={upload.status !== "idle"}
+          disabled={upload.status !== "idle" || isPublishing}
           className="h-9 gap-2 bg-card px-3.5 text-[13px] font-medium hover:bg-accent dark:bg-card dark:hover:bg-accent"
         >
           <ImagePlus strokeWidth={1.7} className="size-[15px]" />
@@ -173,10 +209,11 @@ export function ComposeForm({ userId, linkedInStatus }: ComposeFormProps) {
 
           <Button
             type="button"
+            onClick={handlePublish}
             disabled={!canPublish}
             className="h-11 w-full rounded-md bg-brand px-[18px] text-[13px] font-medium text-white hover:bg-brand-hover disabled:pointer-events-auto disabled:cursor-not-allowed disabled:bg-brand-disabled disabled:opacity-100 md:h-9 md:w-auto"
           >
-            Publish →
+            {isPublishing ? "Publishing…" : "Publish →"}
           </Button>
         </div>
       </div>
